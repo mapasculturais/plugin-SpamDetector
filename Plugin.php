@@ -27,7 +27,7 @@ class Plugin extends \MapasCulturais\Plugin
         $hooks = implode('|', $plugin->config['entities']);
 
         // add hooks
-        $app->hook("entity(<<{$hooks}>>).<<update|create>>:after", function() use ($plugin, $app) {
+        $app->hook("entity(<<{$hooks}>>).<<save>>:after", function() use ($plugin, $app) {
             $admins = ['saasSuperAdmin','admin'];
             $user_ids = [];
             $roles = $app->repo('Role')->findAll();
