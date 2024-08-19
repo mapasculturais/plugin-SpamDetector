@@ -51,95 +51,105 @@ class Plugin extends \MapasCulturais\Plugin
         $plugin = $this;
 
         $hooks = implode('|', $plugin->config['entities']);
-
         // add hooks
-        $app->hook("entity(<<{$hooks}>>).<<save>>:after", function () use ($plugin, $app) {
-            $admins = ['saasSuperAdmin', 'admin'];
+        $app->hook("entity(<<{$hooks}>>).<<save>>:after", function () use ($plugin, $app) {   
+            $subsite_id = $this->subsiteId;
+            $role_type = 'saasSuperAdmin';
+            $entity = $app->repo('Role');
+            $roles = null;
+            
+            if ($subsite_id) {
+                $roles = $entity->findBy(['subsiteId' => $subsite_id]);
+                $role_type = 'admin';
+            } else {
+                $roles = $entity->findAll();
+            }
+            
             $user_ids = [];
-            $roles = $app->repo('Role')->findAll();
-
             if ($roles) {
                 foreach ($roles as $role) {
-                    if (in_array($role->name, $admins)) {
+                    if ($role->name == $role_type) {
                         $user_ids[] = $role->userId;
                     }
                 }
             }
-
+            
             $terms = $plugin->config['terms'];
             $fields = $plugin->config['fields'];
 
-            $spamDetector = [];
-
+            $spam_detector = [];
+            
+            $found_terms = [];
             foreach ($fields as $field) {
-                $foundTerms = [];
                 if ($value = $this->$field) {
-                    $lowercaseValue = mb_strtolower($value);
+                    $lowercase_value = mb_strtolower($value);
                     foreach ($terms as $term) {
-                        if (strpos($lowercaseValue, mb_strtolower($term)) !== false && !in_array($term, $foundTerms)) {
-                            $foundTerms[] = $term;
+                        if (strpos($lowercase_value, mb_strtolower($term)) !== false && !in_array($term, $found_terms)) {
+                            $found_terms[] = $term;
                         }
                     }
 
-                    if (!empty($foundTerms)) {
-                        $spamDetector[] = [
-                            'terms' => $foundTerms,
+                    if ($found_terms) {
+                        $spam_detector[] = [
+                            'terms' => $found_terms,
                             'field' => $field,
                         ];
                     }
                 }
             }
-
-            if (!empty($spamDetector)) {
+            
+            if ($spam_detector) {
                 foreach ($user_ids as $id) {
                     $agents = $app->repo('Agent')->findBy(['userId' => $id]);
                     foreach ($agents as $agent) {
-                        $plugin->createNotification($agent, "Possível spam detectado. Verifique seu email.", $this, $spamDetector);
+                        if($agent->id == $id) {
+                            $plugin->createNotification($agent, "Possível spam detectado. Verifique seu email.", $this, $spam_detector);
+                        }
                     }
                 }
             }
         });
     }
-
+    
     public function register() {}
-
-    public function createNotification($agent, $message, $entity, $spamDetections)
+    
+    public function createNotification($agent, $message, $entity, $spam_detections)
     {
         $app = App::i();
         $app->disableAccessControl();
-
+        
         $notification = new Notification;
         $notification->user = $agent->user;
         $notification->message = $message;
         $notification->save(true);
-
+        
         $filename = $app->view->resolveFilename("views/emails", "email-spam.html");
         $template = file_get_contents($filename);
-
-        $fieldTranslations = [
+        
+        $field_translations = [
             "name" => i::__("Nome"),
             "shortDescription" => i::__("Descrição Curta"),
             "longDescription" => i::__("Descrição Longa"),
         ];
-
-        $detectedDetails = [];
-        foreach ($spamDetections as $detection) {
-            $translatedField = isset($fieldTranslations[$detection['field']]) ? $fieldTranslations[$detection['field']] : $detection['field'];
-            $detectedDetails[] = "Campo: $translatedField, Termos: " . implode(', ', $detection['terms']) . '<br>';
+        
+        $detected_details = [];
+        foreach ($spam_detections as $detection) {
+            $translated_field = isset($field_translations[$detection['field']]) ? $field_translations[$detection['field']] : $detection['field'];
+            $detected_details[] = "Campo: $translated_field, Termos: " . implode(', ', $detection['terms']) . '<br>';
         }
-
+        
         $params = [
             "siteName" => $app->siteName,
             "nome" => $entity->name,
             "id" => $entity->id,
             "url" => $entity->singleUrl,
             "baseUrl" => $app->getBaseUrl(),
-            "detectedDetails" => implode("\n", $detectedDetails),
+            "detectedDetails" => implode("\n", $detected_details),
         ];
-
+        
         $mustache = new \Mustache_Engine();
         $content = $mustache->render($template, $params);
-
+        
         if ($agent->emailPrivado) {
             $app->createAndSendMailMessage([
                 'from' => $app->config['mailer.from'],
