@@ -53,17 +53,8 @@ class Plugin extends \MapasCulturais\Plugin
         $hooks = implode('|', $plugin->config['entities']);
         // add hooks
         $app->hook("entity(<<{$hooks}>>).<<save>>:after", function () use ($plugin, $app) {   
-            $subsite_id = $this->subsiteId;
-            $role_type = 'saasSuperAdmin';
-            $entity = $app->repo('Role');
-            $roles = null;
-            
-            if ($subsite_id) {
-                $roles = $entity->findBy(['subsiteId' => $subsite_id]);
-                $role_type = 'admin';
-            } else {
-                $roles = $entity->findAll();
-            }
+            $roles = $this->subsiteId ? $app->repo('Role')->findBy(['subsiteId' => $this->subsiteId]) : $app->repo('Role')->findAll();
+            $role_type = $this->subsiteId ? 'admin' : 'saasSuperAdmin';
             
             $user_ids = [];
             if ($roles) {
@@ -76,10 +67,9 @@ class Plugin extends \MapasCulturais\Plugin
             
             $terms = $plugin->config['terms'];
             $fields = $plugin->config['fields'];
-
             $spam_detector = [];
-            
             $found_terms = [];
+            
             foreach ($fields as $field) {
                 if ($value = $this->$field) {
                     $lowercase_value = mb_strtolower($value);
