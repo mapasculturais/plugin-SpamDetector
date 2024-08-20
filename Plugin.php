@@ -3,8 +3,13 @@
 namespace SpamDetector;
 
 use Mustache;
-use MapasCulturais\App;
 use MapasCulturais\i;
+use MapasCulturais\App;
+use MapasCulturais\Entities\Agent;
+use MapasCulturais\Entities\Event;
+use MapasCulturais\Entities\Space;
+use MapasCulturais\Entities\Project;
+use MapasCulturais\Entities\Opportunity;
 use MapasCulturais\Entities\Notification;
 
 class Plugin extends \MapasCulturais\Plugin
@@ -93,7 +98,7 @@ class Plugin extends \MapasCulturais\Plugin
                     $agents = $app->repo('Agent')->findBy(['userId' => $id]);
                     foreach ($agents as $agent) {
                         if($agent->id == $id) {
-                            $plugin->createNotification($agent, "Possível spam detectado. Verifique seu email.", $this, $spam_detector);
+                            $plugin->createNotification($agent, $this, $spam_detector);
                         }
                     }
                 }
@@ -103,11 +108,13 @@ class Plugin extends \MapasCulturais\Plugin
     
     public function register() {}
     
-    public function createNotification($agent, $message, $entity, $spam_detections)
+    public function createNotification($agent, $entity, $spam_detections)
     {
         $app = App::i();
         $app->disableAccessControl();
         
+        $entityType = $this->dictEntity($entity);
+        $message = i::__("Possível spam detectado {$entityType} - <strong><i>{$entity->name}</i></strong><br><br> <a href='{$entity->singleUrl}'>Clique aqui</a> para verificar. Mais detalhes foram enviados para o seu e-mail");
         $notification = new Notification;
         $notification->user = $agent->user;
         $notification->message = $message;
@@ -144,11 +151,31 @@ class Plugin extends \MapasCulturais\Plugin
             $app->createAndSendMailMessage([
                 'from' => $app->config['mailer.from'],
                 'to' => $agent->emailPrivado,
-                'subject' => 'Notificação de spam',
+                'subject' => i::__('Notificação de spam'),
                 'body' => $content,
             ]);
         }
 
         $app->enableAccessControl();
     }
+
+    public function dictEntity($entity)
+    {
+        if(get_parent_class($entity) === Opportunity::class) {
+            $class = "MapasCulturais\Entities\Opportunity";
+        } else {
+            $class = get_class($entity);
+        }
+
+        $entities = [
+            Agent::class => i::__('no Agente'),
+            Opportunity::class => i::__('na Oportunidade'),
+            Project::class => i::__('no Projeto'),
+            Space::class => i::__('no Espaço'),
+            Event::class => i::__('no Evento'),
+        ];
+
+        return $entities[$class];
+    }
+    
 }
