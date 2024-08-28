@@ -14,37 +14,43 @@ use MapasCulturais\Entities\Notification;
 
 class Plugin extends \MapasCulturais\Plugin
 {
+    protected $permissionToPublish = true;
+
     public function __construct($config = [])
     {
+        $default_terms = [
+            'citotec',
+            'cytotec',
+            'minecraft',
+            'venda',
+            'compra',
+            'compre',
+            'vendo',
+            'vende',
+            'nazismo',
+            'fascismo',
+            'hitler',
+            'apk',
+            'premium',
+            'grátis',
+            'gratuito',
+            'download',
+            'instalação',
+            'instale',
+            'instalar',
+            'instalador',
+            'instale',
+            'baixar',
+            'vadia',
+            'puta',
+            'canalha'
+        ];
+
         $config += [
-            'terms' => env('SPAM_DETECTOR_TERMS', [
-                'citotec',
-                'minecraft',
-                'venda',
-                'compra',
-                'compre',
-                'vendo',
-                'vende',
-                'nazismo',
-                'fascismo',
-                'hitler',
-                'apk',
-                'premium',
-                'grátis',
-                'gratuito',
-                'download',
-                'instalação',
-                'instale',
-                'instalar',
-                'instalador',
-                'instale',
-                'baixar',
-                'vadia',
-                'puta',
-                'canalha'
-            ]),
+            'terms' => env('SPAM_DETECTOR_TERMS', $default_terms),
             'entities' => env('SPAM_DETECTOR_ENTITIES', ['Agent', 'Opportunity', 'Project', 'Space', 'Event']),
             'fields' => env('SPAM_DETECTOR_FIELDS', ['name', 'shortDescription', 'longDescription']),
+            'termsBlock' => env('SPAM_DETECTOR_TERMS_BLOCK', $default_terms)
         ];
 
         parent::__construct($config);
@@ -56,43 +62,31 @@ class Plugin extends \MapasCulturais\Plugin
         $plugin = $this;
 
         $hooks = implode('|', $plugin->config['entities']);
+
         // add hooks
-        $app->hook("entity(<<{$hooks}>>).<<save>>:after", function () use ($plugin, $app) {   
-            $roles = $this->subsiteId ? $app->repo('Role')->findBy(['subsiteId' => $this->subsiteId]) : $app->repo('Role')->findAll();
-            $role_type = $this->subsiteId ? 'admin' : 'saasSuperAdmin';
+        $app->hook("entity(<<{$hooks}>>).<<insert|publish>>:before", function () use ($plugin, $app) {
+            $user_ids = $plugin->getAdminUserIds($this);
+            $spam_detector = $plugin->validate($this, $plugin->config['termsBlock']);
             
-            $user_ids = [];
-            if ($roles) {
-                foreach ($roles as $role) {
-                    if ($role->name == $role_type) {
-                        $user_ids[] = $role->userId;
-                    }
-                }
-            }
-            
-            $terms = $plugin->config['terms'];
-            $fields = $plugin->config['fields'];
-            $spam_detector = [];
-            $found_terms = [];
-            
-            foreach ($fields as $field) {
-                if ($value = $this->$field) {
-                    $lowercase_value = mb_strtolower($value);
-                    foreach ($terms as $term) {
-                        if (strpos($lowercase_value, mb_strtolower($term)) !== false && !in_array($term, $found_terms)) {
-                            $found_terms[] = $term;
+            if($spam_detector) {
+                $this->setStatus(0);
+
+                foreach ($user_ids as $id) {
+                    $agents = $app->repo('Agent')->findBy(['userId' => $id]);
+
+                    foreach ($agents as $agent) {
+                        if($agent->id == $id) {
+                            $plugin->createNotification($agent, $this, $spam_detector, false);
                         }
                     }
-
-                    if ($found_terms) {
-                        $spam_detector[] = [
-                            'terms' => $found_terms,
-                            'field' => $field,
-                        ];
-                    }
                 }
             }
-            
+        });
+
+        $app->hook("entity(<<{$hooks}>>).<<save>>:after", function () use ($plugin, $app) {
+            $user_ids = $plugin->getAdminUserIds($this);
+            $spam_detector = $plugin->validate($this, $plugin->config['terms']);
+
             if ($spam_detector) {
                 foreach ($user_ids as $id) {
                     $agents = $app->repo('Agent')->findBy(['userId' => $id]);
@@ -104,17 +98,29 @@ class Plugin extends \MapasCulturais\Plugin
                 }
             }
         });
+
+        $app->hook("POST(<<{$hooks}>>.publish):before", function () use($plugin) {
+            $entity = $this->requestedEntity;
+            
+            $plugin->permissionToPublish = $plugin->validate($entity, $plugin->config['termsBlock']) ? false : true;
+        });
+
+        $app->hook("entity(<<{$hooks}>>).canUser(publish)", function ($user, &$result) use($plugin, $app) {
+            if(!$plugin->permissionToPublish && !$app->user->is('admin')) {
+                $result = false;
+            }
+        });
+
     }
     
     public function register() {}
     
-    public function createNotification($agent, $entity, $spam_detections)
+    public function createNotification($agent, $entity, $spam_detections, $is_save = true)
     {
         $app = App::i();
         $app->disableAccessControl();
         
-        $entityType = $this->dictEntity($entity);
-        $message = i::__("Possível spam detectado {$entityType} - <strong><i>{$entity->name}</i></strong><br><br> <a href='{$entity->singleUrl}'>Clique aqui</a> para verificar. Mais detalhes foram enviados para o seu e-mail");
+        $message = $this->getNotificationMessage($entity, $is_save);
         $notification = new Notification;
         $notification->user = $agent->user;
         $notification->message = $message;
@@ -146,11 +152,11 @@ class Plugin extends \MapasCulturais\Plugin
         
         $mustache = new \Mustache_Engine();
         $content = $mustache->render($template, $params);
-        
-        if ($agent->emailPrivado) {
+
+        if ($email = $this->getAdminEmail($agent)) {
             $app->createAndSendMailMessage([
                 'from' => $app->config['mailer.from'],
-                'to' => $agent->emailPrivado,
+                'to' => $email,
                 'subject' => i::__('Notificação de spam'),
                 'body' => $content,
             ]);
@@ -177,5 +183,108 @@ class Plugin extends \MapasCulturais\Plugin
 
         return $entities[$class];
     }
+
+    /**
+     * @param string $text
+     * @return string
+     */
+    public function formatText($text)
+    {
+        $text = trim($text);
+        $text = strip_tags($text);
+        $text = str_replace(["\n", "\t"], "", $text);
+        $text = mb_strtolower($text);
+        $text = preg_replace("/[^a-z0-9]/", "", $text);
+
+        return $text;
+    }
+
+    /**
+     * @param object $entity Objeto da entidade que deve ter a propriedade `subsiteId`. A presença desta propriedade determina o tipo de papéis a serem recuperados.
+     * 
+     * @return array Um array contendo os IDs dos usuários que têm um papel administrativo. O array pode estar vazio se nenhum papel administrativo for encontrado.
+    */
+    public function getAdminUserIds($entity): array {
+        $app = App::i();
+
+        $roles = $entity->subsiteId ? $app->repo('Role')->findBy(['subsiteId' => $entity->subsiteId]) : $app->repo('Role')->findAll();
+        $role_type = $entity->subsiteId ? 'admin' : 'saasSuperAdmin';
+        
+        $user_ids = [];
+        if ($roles) {
+            foreach ($roles as $role) {
+                if ($role->name == $role_type) {
+                    $user_ids[] = $role->userId;
+                }
+            }
+        }
+
+        return $user_ids;
+    }
+
+    /**
+     * @param object $entity Objeto da entidade a ser validada. A entidade deve ter propriedades que correspondem aos campos configurados.
+     * 
+     * @return array Retorna um array contendo os campos onde termos de spam foram encontrados.
+    */
+    public function validate($entity, $terms): array {
+        $fields = $this->config['fields'];
+        $spam_detector = [];
+        $found_terms = [];
+        
+        foreach ($fields as $field) {
+            if ($value = $entity->$field) {
+                $lowercase_value = $this->formatText($value);
+                
+                foreach ($terms as $term) {
+                    $lowercase_term = $this->formatText($term);
+
+                    if (strpos($lowercase_value, $lowercase_term) !== false && !in_array($lowercase_term, $found_terms)) {
+                        $found_terms[] = $term;
+                    }
+                }
+                
+                if ($found_terms) {
+                    $spam_detector[] = [
+                        'terms' => $found_terms,
+                        'field' => $field,
+                    ];
+                }
+            }
+        }
+
+        return $spam_detector;
+    }
+
+    /**
+     * @param object $entity Objeto da entidade que contém as propriedades `name` e `singleUrl`. A propriedade `name` é usada para identificar a entidade na mensagem, e `singleUrl` é o link para a verificação.
+     * @param bool $is_save Indica o status de salvamento da entidade.
+     * 
+     * @return string Retorna uma mensagem formatada de notificação baseada no status de salvamento.
+    */
+    public function getNotificationMessage($entity, $is_save): string {
+        $message_save = i::__("Possível spam detectado - <strong><i>{$entity->name}</i></strong><br><br> <a href='{$entity->singleUrl}'>Clique aqui</a> para verificar. Mais detalhes foram enviados para o seu e-mail");
+        $message_insert = $message_insert = i::__("Possível spam detectado - <strong><i>{$entity->name}</i></strong><br><br> Apenas um administrador pode publicar este conteúdo. Mais detalhes foram enviados para o seu e-mail");
+
+        $message = $is_save ? $message_save : $message_insert;
+
+        return $message;
+    }
     
+    /**
+     * @param object $agent Objeto que representa o agente. O objeto deve ter as propriedades `emailPrivado`, `emailPublico`, e `user` (que deve ter a propriedade `email`).
+     * 
+     * @return string O endereço de e-mail do agente.
+    */
+    public function getAdminEmail($agent): string {
+        if($agent->emailPrivado) {
+            $email = $agent->emailPrivado;
+        } else if($agent->emailPublico) {
+            $email = $agent->emailPublico;
+        } else {
+            $email = $agent->user->email;
+        }
+
+        return $email;
+    }
 }
