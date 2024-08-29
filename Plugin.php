@@ -168,18 +168,33 @@ class Plugin extends \MapasCulturais\Plugin
 
     public function dictEntity($entity)
     {
-        if(get_parent_class($entity) === Opportunity::class) {
-            $class = "MapasCulturais\Entities\Opportunity";
-        } else {
-            $class = get_class($entity);
+    }
+    
+
+    /**
+     *  Retorna o texto relacionado a entidade
+     * @param Entity $entity 
+     * @return string 
+     */
+    public function dictEntity(Entity $entity, $type = "preposição"): string
+    {
+        $class = $entity->getClassName();
+
+        switch ($type) {
+            case 'preposição':
+                $prefixes = (object) ["f" => "na", "m" => "no"];
+                break;
+            default:
+                $prefixes = (object) ["f" => "a", "m" => "o"];
+                break;
         }
 
         $entities = [
-            Agent::class => i::__('no Agente'),
-            Opportunity::class => i::__('na Oportunidade'),
-            Project::class => i::__('no Projeto'),
-            Space::class => i::__('no Espaço'),
-            Event::class => i::__('no Evento'),
+            Agent::class => "{$prefixes->m} Agente",
+            Opportunity::class => "{$prefixes->f} Oportunidade",
+            Project::class => "{$prefixes->m} Projeto",
+            Space::class => "{$prefixes->m} Espaço",
+            Event::class => "{$prefixes->m} Evento",
         ];
 
         return $entities[$class];
