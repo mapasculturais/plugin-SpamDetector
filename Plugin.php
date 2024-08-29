@@ -206,22 +206,21 @@ class Plugin extends \MapasCulturais\Plugin
      * 
      * @return array Um array contendo os IDs dos usuários que têm um papel administrativo. O array pode estar vazio se nenhum papel administrativo for encontrado.
     */
-    public function getAdminUserIds($entity): array {
+    public function getAdminUsers($entity): array {
         $app = App::i();
 
-        $roles = $entity->subsiteId ? $app->repo('Role')->findBy(['subsiteId' => $entity->subsiteId]) : $app->repo('Role')->findAll();
-        $role_type = $entity->subsiteId ? 'admin' : 'saasSuperAdmin';
+        $roles = $app->repo('Role')->findBy(['subsiteId' => [$entity->subsiteId, null]]);
         
-        $user_ids = [];
+        $users = [];
         if ($roles) {
             foreach ($roles as $role) {
-                if ($role->name == $role_type) {
-                    $user_ids[] = $role->userId;
+                if ($role->user->is('admin')) {
+                    $users[] = $role->user;
                 }
             }
         }
 
-        return $user_ids;
+        return $users;
     }
 
     /**
