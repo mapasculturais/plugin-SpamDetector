@@ -95,12 +95,13 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
+        // remove a permissão de publicar caso encontre termos que estão na lista de termos elegível a bloqueio
         $app->hook("entity(<<{$hooks}>>).canUser(publish)", function ($user, &$result) use($plugin, $app) {
-            if(!$plugin->permissionToPublish && !$app->user->is('admin')) {
+            /** @var Entity $this */
+            if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && !$user->is('admin')) {
                 $result = false;
             }
         });
-
     }
     
     public function register() {}
