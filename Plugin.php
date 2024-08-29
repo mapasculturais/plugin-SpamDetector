@@ -228,7 +228,7 @@ class Plugin extends \MapasCulturais\Plugin
      * 
      * @return array Retorna um array contendo os campos onde termos de spam foram encontrados.
     */
-    public function validate($entity, $terms): array {
+    public function getSpamTerms($entity, $terms): array {
         $fields = $this->config['fields'];
         $spam_detector = [];
         $found_terms = [];
