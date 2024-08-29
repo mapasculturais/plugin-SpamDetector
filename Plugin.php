@@ -106,14 +106,15 @@ class Plugin extends \MapasCulturais\Plugin
     
     public function register() {}
     
-    public function createNotification($agent, $entity, $spam_detections, $is_save = true)
+    public function createNotification($recipient, $entity, $spam_detections)
     {
         $app = App::i();
         $app->disableAccessControl();
         
+        $is_save = !$entity->spamBlock;
         $message = $this->getNotificationMessage($entity, $is_save);
         $notification = new Notification;
-        $notification->user = $agent->user;
+        $notification->user = $recipient->user;
         $notification->message = $message;
         $notification->save(true);
         
@@ -144,7 +145,7 @@ class Plugin extends \MapasCulturais\Plugin
         $mustache = new \Mustache_Engine();
         $content = $mustache->render($template, $params);
 
-        if ($email = $this->getAdminEmail($agent)) {
+        if ($email = $this->getAdminEmail($recipient)) {
             $app->createAndSendMailMessage([
                 'from' => $app->config['mailer.from'],
                 'to' => $email,
@@ -154,12 +155,7 @@ class Plugin extends \MapasCulturais\Plugin
         }
 
         $app->enableAccessControl();
-    }
-
-    public function dictEntity($entity)
-    {
-    }
-    
+    }   
 
     /**
      *  Retorna o texto relacionado a entidade
