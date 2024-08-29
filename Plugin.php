@@ -86,26 +86,13 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
-        $app->hook("entity(<<{$hooks}>>).<<save>>:after", function () use ($plugin, $app) {
-            $user_ids = $plugin->getAdminUserIds($this);
-            $spam_detector = $plugin->validate($this, $plugin->config['terms']);
-
-            if ($spam_detector) {
-                foreach ($user_ids as $id) {
-                    $agents = $app->repo('Agent')->findBy(['userId' => $id]);
-                    foreach ($agents as $agent) {
-                        if($agent->id == $id) {
-                            $plugin->createNotification($agent, $this, $spam_detector);
-                        }
-                    }
-                }
+        // Garante que o agente fique em rascunho caso exista termos detectados
+        $app->hook("entity(<<{$hooks}>>).save:before", function () use ($plugin, $app) {
+            /** @var Entity $this */
+            if($plugin->getSpamTerms($this, $plugin->config['termsBlock'])) {
+                $this->setStatus(0);
+                $this->spamBlock = true;
             }
-        });
-
-        $app->hook("POST(<<{$hooks}>>.publish):before", function () use($plugin) {
-            $entity = $this->requestedEntity;
-            
-            $plugin->permissionToPublish = $plugin->validate($entity, $plugin->config['termsBlock']) ? false : true;
         });
 
         $app->hook("entity(<<{$hooks}>>).canUser(publish)", function ($user, &$result) use($plugin, $app) {
