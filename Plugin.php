@@ -64,23 +64,25 @@ class Plugin extends \MapasCulturais\Plugin
 
         $hooks = implode('|', $plugin->config['entities']);
 
-        // add hooks
-        $app->hook("entity(<<{$hooks}>>).<<insert|publish>>:before", function () use ($plugin, $app) {
-            $user_ids = $plugin->getAdminUserIds($this);
-            $spam_detector = $plugin->validate($this, $plugin->config['termsBlock']);
-            
-            if($spam_detector) {
-                $this->setStatus(0);
+        // Verifica se existem termos maliciosos e dispara o e-mail e a notificação
+        $app->hook("entity(<<{$hooks}>>).save:after", function () use ($plugin, $app) {
+            /** @var Entity $this */
+            $users = $plugin->getAdminUsers($this);
+            $terms = array_merge($plugin->config['termsBlock'], $plugin->config['terms']);
 
-                foreach ($user_ids as $id) {
-                    $agents = $app->repo('Agent')->findBy(['userId' => $id]);
+            $spam_terms = $plugin->getSpamTerms($this, $terms);
 
-                    foreach ($agents as $agent) {
-                        if($agent->id == $id) {
-                            $plugin->createNotification($agent, $this, $spam_detector, false);
-                        }
-                    }
+            if ($spam_terms) {
+                foreach ($users as $user) {
+                    $plugin->createNotification($user->profile, $this, $spam_terms);
                 }
+
+                $dict_entity = $plugin->dictEntity($this);
+                $message = i::__("{$dict_entity} {$this->name} foi enviado para moderação");
+                $notification = new Notification;
+                $notification->user = $this->ownerUser;
+                $notification->message = $message;
+                $notification->save(true);
             }
         });
 
