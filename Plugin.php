@@ -19,8 +19,6 @@ class Plugin extends \MapasCulturais\Plugin
     public function __construct($config = [])
     {
         $default_terms = [
-            'citotec',
-            'cytotec',
             'minecraft',
             'venda',
             'compra',
@@ -30,27 +28,31 @@ class Plugin extends \MapasCulturais\Plugin
             'nazismo',
             'fascismo',
             'hitler',
-            'apk',
             'premium',
             'grátis',
             'gratuito',
             'download',
-            'instalação',
-            'instale',
-            'instalar',
-            'instalador',
-            'instale',
             'baixar',
             'vadia',
             'puta',
             'canalha'
         ];
 
+        $terms_block = [
+            'citotec',
+            'cytotec',
+            'apk',
+            'install',
+            'installer',
+            'instale',
+            'instalar',
+            'instalador',
+        ];
+
         $config += [
             'terms' => env('SPAM_DETECTOR_TERMS', $default_terms),
             'entities' => env('SPAM_DETECTOR_ENTITIES', ['Agent', 'Opportunity', 'Project', 'Space', 'Event']),
-            'fields' => env('SPAM_DETECTOR_FIELDS', ['name', 'shortDescription', 'longDescription']),
-            'termsBlock' => env('SPAM_DETECTOR_TERMS_BLOCK', $default_terms)
+            'termsBlock' => env('SPAM_DETECTOR_TERMS_BLOCK', $terms_block)
         ];
 
         parent::__construct($config);
