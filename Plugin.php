@@ -50,6 +50,7 @@ class Plugin extends \MapasCulturais\Plugin
         $config += [
             'terms' => env('SPAM_DETECTOR_TERMS', $default_terms),
             'entities' => env('SPAM_DETECTOR_ENTITIES', ['Agent', 'Opportunity', 'Project', 'Space', 'Event']),
+            'fields' => env('SPAM_DETECTOR_FIELDS', ['name', 'shortDescription', 'longDescription', 'nomeSocial', 'nomeCompleto', 'comunidadesTradicionalOutros']),
             'termsBlock' => env('SPAM_DETECTOR_TERMS_BLOCK', $terms_block)
         ];
 
