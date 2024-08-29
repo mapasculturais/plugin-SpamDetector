@@ -11,6 +11,7 @@ use MapasCulturais\Entities\Space;
 use MapasCulturais\Entities\Project;
 use MapasCulturais\Entities\Opportunity;
 use MapasCulturais\Entities\Notification;
+use MapasCulturais\Entity;
 
 class Plugin extends \MapasCulturais\Plugin
 {
@@ -278,13 +279,13 @@ class Plugin extends \MapasCulturais\Plugin
      * 
      * @return string O endereço de e-mail do agente.
     */
-    public function getAdminEmail($agent): string {
-        if($agent->emailPrivado) {
-            $email = $agent->emailPrivado;
-        } else if($agent->emailPublico) {
-            $email = $agent->emailPublico;
+    public function getAdminEmail($recipient): string {
+        if($recipient->emailPrivado) {
+            $email = $recipient->emailPrivado;
+        } else if($recipient->emailPublico) {
+            $email = $recipient->emailPublico;
         } else {
-            $email = $agent->user->email;
+            $email = $recipient->user->email;
         }
 
         return $email;
