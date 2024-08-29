@@ -264,8 +264,9 @@ class Plugin extends \MapasCulturais\Plugin
      * @return string Retorna uma mensagem formatada de notificação baseada no status de salvamento.
     */
     public function getNotificationMessage($entity, $is_save): string {
-        $message_save = i::__("Possível spam detectado - <strong><i>{$entity->name}</i></strong><br><br> <a href='{$entity->singleUrl}'>Clique aqui</a> para verificar. Mais detalhes foram enviados para o seu e-mail");
-        $message_insert = $message_insert = i::__("Possível spam detectado - <strong><i>{$entity->name}</i></strong><br><br> Apenas um administrador pode publicar este conteúdo. Mais detalhes foram enviados para o seu e-mail");
+        $dict_entity = $this->dictEntity($entity);
+        $message_save = i::__("Possível spam detectado {$dict_entity} - <strong><i>{$entity->name}</i></strong><br><br> <a href='{$entity->singleUrl}'>Clique aqui</a> para verificar. Mais detalhes foram enviados para o seu e-mail");
+        $message_insert = $message_insert = i::__("Possível spam detectado {$dict_entity} - <strong><i>{$entity->name}</i></strong><br><br> Apenas um administrador pode publicar este conteúdo. Mais detalhes foram enviados para o seu e-mail");
 
         $message = $is_save ? $message_save : $message_insert;
 
