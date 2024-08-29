@@ -14,8 +14,6 @@ use MapasCulturais\Entities\Notification;
 
 class Plugin extends \MapasCulturais\Plugin
 {
-    protected $permissionToPublish = true;
-
     public function __construct($config = [])
     {
         $default_terms = [
