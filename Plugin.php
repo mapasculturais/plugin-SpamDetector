@@ -2,6 +2,7 @@
 
 namespace SpamDetector;
 
+use DateTime;
 use Mustache;
 use MapasCulturais\i;
 use MapasCulturais\App;
@@ -64,16 +65,27 @@ class Plugin extends \MapasCulturais\Plugin
         $plugin = $this;
 
         $hooks = implode('|', $plugin->config['entities']);
+        $last_spam_sent = null;
 
         // Verifica se existem termos maliciosos e dispara o e-mail e a notificação
-        $app->hook("entity(<<{$hooks}>>).save:after", function () use ($plugin, $app) {
+        $app->hook("entity(<<{$hooks}>>).save:after", function () use ($plugin, $last_spam_sent) {
             /** @var Entity $this */
             $users = $plugin->getAdminUsers($this);
             $terms = array_merge($plugin->config['termsBlock'], $plugin->config['terms']);
 
             $spam_terms = $plugin->getSpamTerms($this, $terms);
+            $current_date_time = new DateTime();
+            $current_timestamp = $current_date_time->getTimestamp();
+            $eligible_spam = $last_spam_sent ?? $this->spam_sent_email;
 
-            if ($spam_terms) {
+            if (
+                $spam_terms && 
+                (
+                    !$eligible_spam || 
+                    ($current_timestamp - $eligible_spam->getTimestamp()) >= 86400
+                )
+            ) {
+
                 foreach ($users as $user) {
                     $plugin->createNotification($user->profile, $this, $spam_terms);
                 }
@@ -97,9 +109,13 @@ class Plugin extends \MapasCulturais\Plugin
         });
 
         // remove a permissão de publicar caso encontre termos que estão na lista de termos elegível a bloqueio
-        $app->hook("entity(<<{$hooks}>>).canUser(publish)", function ($user, &$result) use($plugin, $app) {
+        $app->hook("entity(<<{$hooks}>>).canUser(publish)", function ($user, &$result) use($plugin, &$last_spam_sent) {
             /** @var Entity $this */
             if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && !$user->is('admin')) {
+                $last_spam_sent = $this->spam_sent_email ?? null;
+                $this->spam_sent_email = new DateTime();
+                $this->spam_sent_email->add(new \DateInterval('PT10S'));
+                $this->save(true);
                 $result = false;
             }
         });
