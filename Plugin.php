@@ -105,7 +105,19 @@ class Plugin extends \MapasCulturais\Plugin
         });
     }
     
-    public function register() {}
+    public function register() {
+        $entities = $this->config['entities'];
+
+        foreach($entities as $entity) {
+            $namespace = "MapasCulturais\\Entities\\{$entity}";
+
+            $this->registerMetadata($namespace,'spam_sent_email', [
+                'label' => i::__('Data de envio do e-mail'),
+                'type' => 'DateTime',
+                'default' => null,
+            ]);
+        }
+    }
     
     public function createNotification($recipient, $entity, $spam_detections)
     {
