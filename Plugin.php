@@ -41,12 +41,24 @@ class Plugin extends \MapasCulturais\Plugin
         $terms_block = [
             'citotec',
             'cytotec',
+            'sytotec',
+            'sitotec',
             'apk',
             'install',
             'installer',
             'instale',
             'instalar',
             'instalador',
+            'mysoprosotol',
+            'mysoprosotol',
+            'myzoprozotol',
+            'mysoprozotol',
+            'myzoprosotol',
+            'misoprosotol',
+            'misoprosotol',
+            'mizoprozotol',
+            'misoprozotol',
+            'mizoprosotol'
         ];
 
         $default_fields = [
