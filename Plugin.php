@@ -88,7 +88,6 @@ class Plugin extends \MapasCulturais\Plugin
         // Verifica se existem termos maliciosos e dispara o e-mail e a notificação
         $app->hook("entity(<<{$hooks}>>).save:after", function () use ($plugin, $last_spam_sent) {
             /** @var Entity $this */
-            $plugin->registerSpamSentEmailMetadata($this);
             $users = $plugin->getAdminUsers($this);
             $terms = array_merge($plugin->config['termsBlock'], $plugin->config['terms']);
 
@@ -130,7 +129,6 @@ class Plugin extends \MapasCulturais\Plugin
         // remove a permissão de publicar caso encontre termos que estão na lista de termos elegível a bloqueio
         $app->hook("entity(<<{$hooks}>>).canUser(publish)", function ($user, &$result) use($plugin, &$last_spam_sent) {
             /** @var Entity $this */
-            $plugin->registerSpamSentEmailMetadata($this);
             if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && !$user->is('admin')) {
                 $last_spam_sent = $this->spam_sent_email ?? null;
                 $this->spam_sent_email = new DateTime();
@@ -141,27 +139,18 @@ class Plugin extends \MapasCulturais\Plugin
         });
     }
     
-    public function register()
-    {
+    public function register() {
         $entities = $this->config['entities'];
+
         foreach($entities as $entity) {
-            $this->registerSpamSentEmailMetadata($entity);
+            $namespace = "MapasCulturais\\Entities\\{$entity}";
+
+            $this->registerMetadata($namespace,'spam_sent_email', [
+                'label' => i::__('Data de envio do e-mail'),
+                'type' => 'DateTime',
+                'default' => null,
+            ]);
         }
-    }
-
-    /**
-     * @param string $entity 
-     * @return void 
-     */
-    public function registerSpamSentEmailMetadata(string $entity): void
-    {
-        $namespace = "MapasCulturais\\Entities\\{$entity}";
-
-        $this->registerMetadata($namespace,'spam_sent_email', [
-            'label' => i::__('Data de envio do e-mail'),
-            'type' => 'DateTime',
-            'default' => null,
-        ]);
     }
     
     public function createNotification($recipient, $entity, $spam_detections)
