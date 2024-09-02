@@ -49,10 +49,28 @@ class Plugin extends \MapasCulturais\Plugin
             'instalador',
         ];
 
+        $default_fields = [
+            'name', 
+            'shortDescription', 
+            'longDescription', 
+            'nomeSocial', 
+            'nomeCompleto', 
+            'comunidadesTradicionalOutros',
+            'facebook',
+            'twitter',
+            'instagram',
+            'linkedin',
+            'vimeo',
+            'spotify',
+            'youtube',
+            'pinterest',
+            'tiktok'
+        ];
+
         $config += [
             'terms' => env('SPAM_DETECTOR_TERMS', $default_terms),
             'entities' => env('SPAM_DETECTOR_ENTITIES', ['Agent', 'Opportunity', 'Project', 'Space', 'Event']),
-            'fields' => env('SPAM_DETECTOR_FIELDS', ['name', 'shortDescription', 'longDescription', 'nomeSocial', 'nomeCompleto', 'comunidadesTradicionalOutros']),
+            'fields' => env('SPAM_DETECTOR_FIELDS', $default_fields),
             'termsBlock' => env('SPAM_DETECTOR_TERMS_BLOCK', $terms_block)
         ];
 
@@ -223,9 +241,8 @@ class Plugin extends \MapasCulturais\Plugin
     {
         $text = trim($text);
         $text = strip_tags($text);
-        $text = str_replace(["\n", "\t"], "", $text);
         $text = mb_strtolower($text);
-        $text = preg_replace("/[^a-z0-9]/", "", $text);
+        $text = preg_replace("/[^a-z0-9_\s]/", "", $text);
 
         return $text;
     }
@@ -269,17 +286,22 @@ class Plugin extends \MapasCulturais\Plugin
                 foreach ($terms as $term) {
                     $lowercase_term = $this->formatText($term);
 
-                    if (strpos($lowercase_value, $lowercase_term) !== false && !in_array($lowercase_term, $found_terms)) {
-                        $found_terms[] = $term;
+                    $pattern = '/\b' . preg_quote($lowercase_term, '/') . '\b/';
+
+                    if (preg_match($pattern, $lowercase_value) && !in_array($term, $found_terms)) {
+                        
+                        $found_terms[$field][] = $term;
                     }
                 }
-                
-                if ($found_terms) {
-                    $spam_detector[] = [
-                        'terms' => $found_terms,
-                        'field' => $field,
-                    ];
-                }
+            }
+        }
+
+        if ($found_terms) {
+            foreach($found_terms as $key => $value) {
+                $spam_detector[] = [
+                    'field' => $key,
+                    'terms' => $value
+                ];
             }
         }
 
