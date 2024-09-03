@@ -259,7 +259,6 @@ class Plugin extends \MapasCulturais\Plugin
         $text = trim($text);
         $text = strip_tags($text);
         $text = mb_strtolower($text);
-        $text = preg_replace("/[^a-z0-9 \s]/", "", $text);
 
         return $text;
     }
@@ -295,7 +294,9 @@ class Plugin extends \MapasCulturais\Plugin
         $fields = $this->config['fields'];
         $spam_detector = [];
         $found_terms = [];
-        $special_chars = ['@', '#', '$', '%', '^', '·', '&', '*', '(', ')', '-', '_', '=', '+', '{', '}', '[', ']', '|', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', ' ', ''];
+        $special_chars = ['@', '#', '$', '%', '^', '·', '&', '*', '(', ')', '-', '_', '=', '+', '{', '}', '[', ']', '|', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', ' '];
+        $special_chars = array_map(fn($char) => preg_quote($char, '/'), $special_chars);
+        $special_chars = '[' . implode('', $special_chars) . ']*';
 
         foreach ($fields as $field) {
             if ($value = $entity->$field) {
@@ -303,16 +304,12 @@ class Plugin extends \MapasCulturais\Plugin
                 
                 foreach ($terms as $term) {
                     $lowercase_term = $this->formatText($term);
-                    
-                    foreach($special_chars as $special_char) {
-                        $_term = implode($special_char, mb_str_split($lowercase_term));
+                    $_term = implode("{$special_chars}", mb_str_split($lowercase_term));
 
-                        $pattern = '/([^\w]|[_0-9]|^)' . preg_quote($_term, '/') . '([^\w]|[_0-9]|$)/';
-    
-                        if (preg_match($pattern, $lowercase_value) && !in_array($term, $found_terms)) {
-                            
-                            $found_terms[$field][] = $term;
-                        }
+                    $pattern = '/([^\w]|[_0-9]|^)' . $_term . '([^\w]|[_0-9]|$)/';
+                    
+                    if (preg_match($pattern, $lowercase_value) && !in_array($term, $found_terms)) {
+                        $found_terms[$field][] = $term;
                     }
                 }
             }
