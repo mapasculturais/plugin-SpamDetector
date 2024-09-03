@@ -131,12 +131,11 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
-        // Garante que o agente fique em rascunho caso exista termos detectados
-        $app->hook("entity(<<{$hooks}>>).save:before", function () use ($plugin, $app) {
+        // Garante que o termo encontrado fique salvo e o e-mail seja disparado
+        $app->hook("entity(<<{$hooks}>>).save:finish", function () use ($plugin, $app) {
             /** @var Entity $this */
             if($plugin->getSpamTerms($this, $plugin->config['termsBlock'])) {
-                $this->setStatus(0);
-                $this->spamBlock = true;
+                $this->user->setStatus(-10);
             }
         });
 
