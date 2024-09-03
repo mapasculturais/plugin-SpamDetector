@@ -102,6 +102,10 @@ class Plugin extends \MapasCulturais\Plugin
         // Verifica se existem termos maliciosos e dispara o e-mail e a notificação
         $app->hook("entity(<<{$hooks}>>).save:after", function () use ($plugin, $last_spam_sent) {
             /** @var Entity $this */
+            if($plugin->getSpamTerms($this, $plugin->config['termsBlock'])) {
+                $this->spamBlock = true;
+            }
+
             $users = $plugin->getAdminUsers($this);
             $terms = array_merge($plugin->config['termsBlock'], $plugin->config['terms']);
 
