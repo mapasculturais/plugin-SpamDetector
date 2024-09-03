@@ -34,7 +34,7 @@
 
 ## Personalização
 
-- As configurações do plugin permitem personalizar os termos a serem detectados (`terms`), as entidades monitoradas (`entities`), e os campos onde a detecção deve ocorrer (`fields`). Essas configurações podem ser definidas dentro de uma chave chamada `config` no arquivo `docker/common/config.d/plugins.php`, como mostrado abaixo:
+- As configurações do plugin permitem personalizar os termos a serem detectados (`terms`) e bloqueados (`termsBlock`), as entidades monitoradas (`entities`), e os campos onde a detecção deve ocorrer (`fields`). Essas configurações podem ser definidas dentro de uma chave chamada `config` no arquivo `docker/common/config.d/plugins.php`, como mostrado abaixo:
 
     ```php
     <?php
@@ -47,7 +47,8 @@
                 "namespace" => "SpamDetector",
                 "config" => [
                     // suas configurações personalizadas abaixo, por exemplo:
-                    "terms" => ['citotec', 'minecraft', 'venda', 'cytotec'],
+                    "terms" => ['compra', 'minecraft', 'venda', 'download'],
+                    "termsBlock" => ['citotec', 'apk']
                 ]
             ]
         ]
