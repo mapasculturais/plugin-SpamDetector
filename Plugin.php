@@ -40,9 +40,11 @@ class Plugin extends \MapasCulturais\Plugin
 
         $terms_block = [
             'citotec',
+            'c1totec',
             'cytotec',
             'sytotec',
             'sitotec',
+            's1totec',
             'apk',
             'install',
             'installer',
