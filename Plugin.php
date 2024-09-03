@@ -147,10 +147,6 @@ class Plugin extends \MapasCulturais\Plugin
         $app->hook("entity(<<{$hooks}>>).canUser(publish)", function ($user, &$result) use($plugin, &$last_spam_sent) {
             /** @var Entity $this */
             if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && !$user->is('admin')) {
-                $last_spam_sent = $this->spam_sent_email ?? null;
-                $this->spam_sent_email = new DateTime();
-                $this->spam_sent_email->add(new \DateInterval('PT10S'));
-                $this->save(true);
                 $result = false;
             }
         });
@@ -216,6 +212,18 @@ class Plugin extends \MapasCulturais\Plugin
                 'subject' => $is_save ? i::__('Notificação de spam') : i::__('Notificação de spam - Publicação não permitida'),
                 'body' => $content,
             ]);
+        }
+
+        // Salvar metadado
+        $date_time = new DateTime();
+        $date_time->add(new \DateInterval('PT10S'));
+        $date_time = $date_time->format('Y-m-d H:i:s');
+        
+        $conn = $app->em->getConnection();
+        if(!$conn->fetchAll("SELECT * FROM agent_meta WHERE key = 'spam_sent_email' and object_id = {$entity->id}")) {
+            $conn->executeQuery("INSERT INTO agent_meta (id, object_id, key, value) VALUES (nextval('agent_meta_id_seq'), {$entity->id}, 'spam_sent_email', '{$date_time}')");
+        } else {
+            $conn->executeQuery("UPDATE agent_meta SET value = '{$date_time}' WHERE object_id = {$entity->id} AND key = 'spam_sent_email'");
         }
 
         $app->enableAccessControl();
