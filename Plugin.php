@@ -122,12 +122,14 @@ class Plugin extends \MapasCulturais\Plugin
                 )
             ) {
 
+                $ip = $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+
                 foreach ($users as $user) {
-                    $plugin->createNotification($user->profile, $this, $spam_terms);
+                    $plugin->createNotification($user->profile, $this, $spam_terms, $ip);
                 }
 
                 $dict_entity = $plugin->dictEntity($this);
-                $message = i::__("{$dict_entity} {$this->name} foi enviado para moderação");
+                $message = i::__("{$dict_entity} {$this->name} foi enviado para moderação. Informamos que registramos seu ip: {$ip}");
                 $notification = new Notification;
                 $notification->user = $this->ownerUser;
                 $notification->message = $message;
@@ -166,7 +168,7 @@ class Plugin extends \MapasCulturais\Plugin
         }
     }
     
-    public function createNotification($recipient, $entity, $spam_detections)
+    public function createNotification($recipient, $entity, $spam_detections, $ip)
     {
         $app = App::i();
         $app->disableAccessControl();
@@ -200,6 +202,7 @@ class Plugin extends \MapasCulturais\Plugin
             "url" => $entity->singleUrl,
             "baseUrl" => $app->getBaseUrl(),
             "detectedDetails" => implode("\n", $detected_details),
+            "ip" => $ip
         ];
         
         $mustache = new \Mustache_Engine();
