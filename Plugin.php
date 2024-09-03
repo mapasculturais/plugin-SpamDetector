@@ -259,7 +259,7 @@ class Plugin extends \MapasCulturais\Plugin
         $text = trim($text);
         $text = strip_tags($text);
         $text = mb_strtolower($text);
-        $text = preg_replace("/[^a-z0-9_\s]/", "", $text);
+        $text = preg_replace("/[^a-z0-9 \s]/", "", $text);
 
         return $text;
     }
@@ -295,19 +295,24 @@ class Plugin extends \MapasCulturais\Plugin
         $fields = $this->config['fields'];
         $spam_detector = [];
         $found_terms = [];
-        
+        $special_chars = ['@', '#', '$', '%', '^', '·', '&', '*', '(', ')', '-', '_', '=', '+', '{', '}', '[', ']', '|', ':', ';', '"', '\'', '<', '>', ',', '.', '?', '/', ' ', ''];
+
         foreach ($fields as $field) {
             if ($value = $entity->$field) {
                 $lowercase_value = $this->formatText($value);
                 
                 foreach ($terms as $term) {
                     $lowercase_term = $this->formatText($term);
+                    
+                    foreach($special_chars as $special_char) {
+                        $_term = implode($special_char, mb_str_split($lowercase_term));
 
-                    $pattern = '/\b' . preg_quote($lowercase_term, '/') . '\b/';
-
-                    if (preg_match($pattern, $lowercase_value) && !in_array($term, $found_terms)) {
-                        
-                        $found_terms[$field][] = $term;
+                        $pattern = '/([^\w]|[_0-9]|^)' . preg_quote($_term, '/') . '([^\w]|[_0-9]|$)/';
+    
+                        if (preg_match($pattern, $lowercase_value) && !in_array($term, $found_terms)) {
+                            
+                            $found_terms[$field][] = $term;
+                        }
                     }
                 }
             }
