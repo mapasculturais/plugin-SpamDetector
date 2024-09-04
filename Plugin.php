@@ -99,12 +99,17 @@ class Plugin extends \MapasCulturais\Plugin
         $hooks = implode('|', $plugin->config['entities']);
         $last_spam_sent = null;
 
-        // Verifica se existem termos maliciosos e dispara o e-mail e a notificação
-        $app->hook("entity(<<{$hooks}>>).save:after", function () use ($plugin, $last_spam_sent) {
+        $app->hook("entity(<<{$hooks}>>).save:before", function () use ($plugin, $app) {
             /** @var Entity $this */
             if($plugin->getSpamTerms($this, $plugin->config['termsBlock'])) {
                 $this->spamBlock = true;
+                $this->setStatus(-10);
             }
+        });
+
+        // Verifica se existem termos maliciosos e dispara o e-mail e a notificação
+        $app->hook("entity(<<{$hooks}>>).save:after", function () use ($plugin, $last_spam_sent) {
+            /** @var Entity $this */
 
             $users = $plugin->getAdminUsers($this);
             $terms = array_merge($plugin->config['termsBlock'], $plugin->config['terms']);
@@ -141,7 +146,7 @@ class Plugin extends \MapasCulturais\Plugin
         $app->hook("entity(<<{$hooks}>>).save:finish", function () use ($plugin, $app) {
             /** @var Entity $this */
             if($plugin->getSpamTerms($this, $plugin->config['termsBlock'])) {
-                $this->user->setStatus(-10);
+                $this->ownerUser->setStatus(-10);
             }
         });
 
