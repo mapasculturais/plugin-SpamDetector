@@ -274,6 +274,9 @@ class Plugin extends \MapasCulturais\Plugin
             case 'preposição':
                 $prefixes = (object) ["f" => "na", "m" => "no"];
                 break;
+            case 'pronome':
+                $prefixes = (object) ["f" => "esta", "m" => "este"];
+                break;
             default:
                 $prefixes = (object) ["f" => "a", "m" => "o"];
                 break;
