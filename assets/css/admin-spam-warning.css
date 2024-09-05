@@ -1,4 +1,4 @@
-.spam-warning {
+.spam-alert {
     position: relative;
     top: 20px;
     text-align: center;
@@ -6,6 +6,17 @@
     padding: 10px;
 }
 
-.spam-warning input[type="checkbox"] {
-    margin-left: 10px;
+.spam-alert .spam-click {
+    background: none;
+    color: white;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+.spam-alert .warning .spam-click {
+    color: black;
 }
