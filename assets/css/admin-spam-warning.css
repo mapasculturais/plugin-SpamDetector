@@ -1,0 +1,11 @@
+.spam-warning {
+    position: relative;
+    top: 20px;
+    text-align: center;
+    z-index: 1000;
+    padding: 10px;
+}
+
+.spam-warning input[type="checkbox"] {
+    margin-left: 10px;
+}
