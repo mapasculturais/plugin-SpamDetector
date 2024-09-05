@@ -119,14 +119,10 @@ class Plugin extends \MapasCulturais\Plugin
             $current_timestamp = $current_date_time->getTimestamp();
             $eligible_spam = $last_spam_sent ?? $this->spam_sent_email;
 
-            if (
-                $spam_terms && 
-                (
-                    !$eligible_spam || 
-                    ($current_timestamp - $eligible_spam->getTimestamp()) >= 86400
-                )
-            ) {
+            $is_spam_eligible = !$eligible_spam || ($current_timestamp - $eligible_spam->getTimestamp()) >= 86400;
+            $is_spam_status_valid = is_null($this->spam_status) || $this->spam_status;
 
+            if ($spam_terms && $is_spam_eligible && $is_spam_status_valid) {
                 $ip = $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
 
                 foreach ($users as $user) {
