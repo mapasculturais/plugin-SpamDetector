@@ -20,8 +20,4 @@ app.component('spam-warning', {
             this.entity.save();
         }
     },
-
-    mounted() {
-        console.log("ENTITY =>", this.entity);
-    }
 });
