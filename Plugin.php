@@ -132,7 +132,7 @@ class Plugin extends \MapasCulturais\Plugin
             $eligible_spam = $last_spam_sent ?? $this->spam_sent_email;
 
             $is_spam_eligible = !$eligible_spam || ($current_timestamp - $eligible_spam->getTimestamp()) >= 86400;
-            $is_spam_status_valid = is_null($this->spam_status) || $this->spam_status;
+            $is_spam_status_valid = !$this->spam_status;
 
             if ($spam_terms && $is_spam_eligible && $is_spam_status_valid) {
                 $ip = $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
@@ -192,7 +192,7 @@ class Plugin extends \MapasCulturais\Plugin
             $this->registerMetadata($namespace,'spam_status', [
                 'label' => i::__('Classificar como Spam'),
                 'type' => 'boolean',
-                'default' => true,
+                'default' => false,
             ]);
         }
     }
