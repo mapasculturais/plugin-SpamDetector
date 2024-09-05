@@ -65,6 +65,16 @@ class Plugin extends \MapasCulturais\Plugin
             'mizoprosotol'
         ];
 
+        if(isset($config['termsBlock'])) {
+            $terms_block = $terms_block += $config['termsBlock'];
+            $config['termsBlock'] = $terms_block;
+        }
+        
+        if(isset($config['terms'])) {
+            $default_terms = $default_terms += $config['terms'];
+            $config['terms'] = $default_terms;
+        }
+
         $default_fields = [
             'name', 
             'shortDescription', 
