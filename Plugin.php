@@ -157,6 +157,16 @@ class Plugin extends \MapasCulturais\Plugin
                 $result = false;
             }
         });
+
+        // Caso for encontrado o termo e o usuário logado for o admin, irá aparecer na entidade um warning
+        $app->hook("template(<<{$hooks}>>.<<edit|single>>.entity-header):before", function() use($plugin, $app) {
+            $entity = $this->controller->requestedEntity;
+
+            if($plugin->getSpamTerms($entity, $plugin->config['terms']) && $app->user->is('admin')) {
+                $this->part('admin-spam-warning');
+                $app->view->enqueueStyle('app-v2', 'admin-spam-warning', 'css/admin-spam-warning.css');
+            }
+        });
     }
     
     public function register() {
