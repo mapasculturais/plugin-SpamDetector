@@ -29,8 +29,11 @@
 
 ## Como funciona
 
-- O plugin monitora atualizações e criações de entidades específicas (Agente, Oportunidade, Projeto, Espaço, Evento) e verifica se os campos configurados (por padrão, `name`, `shortDescription`, `longDescription`) contêm termos suspeitos predefinidos, como "citotec" e "minecraft".
-- Se termos suspeitos forem encontrados, o plugin notifica automaticamente os administradores (super admins e admins) via e-mail, listando os termos detectados e os campos onde foram encontrados.
+- O plugin `SpamDetector` atua de forma contínua monitorando as ações de criação e atualização de entidades no sistema Mapas Culturais, como Agente, Oportunidade, Projeto, Espaço e Evento. Ele realiza a verificação automática de campos previamente configurados, como `name`, `shortDescription`, `longDescription`, entre outros, em busca de termos que possam indicar comportamentos suspeitos ou maliciosos.
+
+- Quando um termo suspeito é encontrado em qualquer um dos campos monitorados, o plugin notifica imediatamente os administradores (super admins e admins) através de e-mail e notificação do sistema. A notificação inclui detalhes sobre os termos detectados e especifica em quais campos esses termos foram encontrados. Ao acessar a entidade, os administradores verão um alerta visível no painel de administração, onde poderão marcar ou desmarcar a entidade como spam. Caso a entidade permaneça classificada como spam, o plugin enviará uma nova notificação a cada 24 horas, reforçando a necessidade de uma possível intervenção.
+
+- Nos casos mais graves, em que um termo bloqueado for identificado, o comportamento do plugin é ainda mais rigoroso. Nessa situação, tanto a entidade quanto o usuário responsável por criá-la ou atualizá-la serão movidos automaticamente para a lixeira, e uma notificação será enviada aos administradores.
 
 ## Personalização
 
@@ -55,7 +58,7 @@
     ];
     ```
 
-- **IMPORTANTE:** Ao adicionar configurações personalizadas na chave `config`, o que for adicionado irá **sobrescrever** a configuração padrão. Certifique-se de incluir todos os parâmetros necessários para evitar comportamentos indesejados.
+- **IMPORTANTE:** Ao adicionar configurações personalizadas na chave `config`, o que for adicionado irá **somar** a configuração padrão. Certifique-se de incluir todos os parâmetros necessários para evitar comportamentos indesejados.
 
 ## Notificações
 
