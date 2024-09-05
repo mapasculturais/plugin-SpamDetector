@@ -170,6 +170,12 @@ class Plugin extends \MapasCulturais\Plugin
                 'type' => 'DateTime',
                 'default' => null,
             ]);
+            
+            $this->registerMetadata($namespace,'spam_status', [
+                'label' => i::__('Classificar como Spam'),
+                'type' => 'boolean',
+                'default' => true,
+            ]);
         }
     }
     
