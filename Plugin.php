@@ -16,6 +16,8 @@ use MapasCulturais\Entity;
 
 class Plugin extends \MapasCulturais\Plugin
 {
+    protected static $instance;
+
     public function __construct($config = [])
     {
         $default_terms = [
@@ -101,6 +103,7 @@ class Plugin extends \MapasCulturais\Plugin
         ];
 
         parent::__construct($config);
+        self::$instance = $this;
     }
 
     public function _init()
@@ -401,5 +404,9 @@ class Plugin extends \MapasCulturais\Plugin
         }
 
         return $email;
+    }
+
+    public static function getInstance(){
+        return self::$instance;
     }
 }
