@@ -35,7 +35,9 @@ class Plugin extends \MapasCulturais\Plugin
             'baixar',
             'vadia',
             'puta',
-            'canalha'
+            'canalha',
+            'farmácia',
+            'farma',
         ];
 
         $terms_block = [
