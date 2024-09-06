@@ -244,7 +244,7 @@ class Plugin extends \MapasCulturais\Plugin
             $app->createAndSendMailMessage([
                 'from' => $app->config['mailer.from'],
                 'to' => $email,
-                'subject' => $is_save ? i::__('Notificação de spam') : i::__('Notificação de spam - Publicação não permitida'),
+                'subject' => $is_save ? i::__("Spam - Conteúdo suspeito") : i::__("Spam - {$dict_entity} foi bloqueado(a)"),
                 'body' => $content,
             ]);
         }
