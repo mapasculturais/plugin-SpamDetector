@@ -19,32 +19,28 @@ $this->import('
 
 <div class="spam-alert">
     <mc-alert v-if="!entity.spam_status" type="danger" class="spam-alert">
-        <label> 
-            <?= i::__('Identificamos um possível spam neste cadastro. CASO NÃO SEJA,')  ?>
-                
-            <mc-confirm-button message="<?= i::esc_attr__('Deseja retirar do spam?')?>" @confirm="setSpamStatus()">
-                <template #button="modal">
-                    <button @click="modal.open()" class="spam-click">
-                        <?php i::_e("clique aqui") ?>
-                    </button>
-                </template>
-            </mc-confirm-button> 
+        <?= i::__('Identificamos um possível spam neste cadastro. CASO NÃO SEJA,')  ?>
+            
+        <mc-confirm-button message="<?= i::esc_attr__('Deseja retirar do spam?')?>" @cancel="closeModal($event)" @confirm="setSpamStatus()">
+            <template #button="modal">
+                <button @click="modal.open()" class="spam-click">
+                    <?php i::_e("clique aqui") ?>
+                </button>
+            </template>
+        </mc-confirm-button> 
 
-            <?= i::__('para desativar mensagens futuras. CASO SEJA SPAM, clique no botão <strong>Excluir</strong> no rodapé.')  ?>
-        </label>
+        <?= i::__('para desativar mensagens futuras. CASO SEJA SPAM, clique no botão <strong>Excluir</strong> no rodapé.')  ?>
     </mc-alert>
 
     <mc-alert v-else type="warning" class="spam-alert">
-        <label> 
-            <?= i::__("{$dict_entity} já foi detectada como possível spam. Caso deseje reativar as notificações,") ?>
+        <?= i::__("{$dict_entity} já foi detectada como possível spam. Caso deseje reativar as notificações,") ?>
 
-            <mc-confirm-button message="<?= i::esc_attr__('Deseja marcar como spam?')?>" @confirm="setSpamStatus()">
-                <template #button="modal">
-                    <button @click="modal.open()" class="spam-click">
-                        <?= i::__('clique aqui') ?>
-                    </button>
-                </template>
-            </mc-confirm-button> 
-        </label>
+        <mc-confirm-button message="<?= i::esc_attr__('Deseja marcar como spam?')?>" @cancel="closeModal($event)" @confirm="setSpamStatus()">
+            <template #button="modal">
+                <button @click="modal.open()" class="spam-click">
+                    <?= i::__('clique aqui') ?>
+                </button>
+            </template>
+        </mc-confirm-button> 
     </mc-alert>
 </div>

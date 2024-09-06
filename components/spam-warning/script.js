@@ -10,7 +10,7 @@ app.component('spam-warning', {
 
     data() {
         return {
-            spamStatus: this.entity?.spam_status ?? true
+            spamStatus: this.entity?.spam_status ?? false
         }
     },
 
@@ -19,6 +19,10 @@ app.component('spam-warning', {
             this.spamStatus = !this.spamStatus;
             this.entity.spam_status = this.spamStatus;
             this.entity.save();
+        },
+
+        closeModal(modal) {
+            modal.close();
         }
     },
 
