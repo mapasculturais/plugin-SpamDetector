@@ -527,12 +527,12 @@
                                 <table role="presentation" border="0" cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td>
-                                            <p>Olá, administrador.</p>
+                                            <p>Olá, {{adminName}}.</p>
 
-                                            <p>O sistema detectou possível spam em um conteúdo recente. Por favor,
-                                                revise as informações abaixo e tome as medidas necessárias:</p>
+                                            <p>{{mailMessage}}</p>
                                             <div class="status-card">
                                                 <h3 class="status-card--title">Detalhes da Detecção</h3>
+                                                <p><strong>Tipo:</strong> {{dictEntity}}</p>
                                                 <p><strong>Nome:</strong> {{nome}}</p>
                                                 <p><strong>ID:</strong> {{id}}</p>
                                                 <p><strong>IP:</strong> {{ip}}</p>

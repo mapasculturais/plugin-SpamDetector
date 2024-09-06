@@ -226,7 +226,13 @@ class Plugin extends \MapasCulturais\Plugin
             $translated_field = isset($field_translations[$detection['field']]) ? $field_translations[$detection['field']] : $detection['field'];
             $detected_details[] = "Campo: $translated_field, Termos: " . implode(', ', $detection['terms']) . '<br>';
         }
-        
+
+        $dict_entity = $this->dictEntity($entity, 'artigo');
+
+        $mail_notification_message = i::__('O sistema detectou possível spam em um conteúdo recente. Por favor, revise as informações abaixo e tome as medidas necessárias:');
+        $mail_blocked_message = i::__("O sistema detectou um conteúdo inadequado neste cadastro e moveu-o para a lixeira. Seguem abaixo os dados para análise do conteúdo:");
+        $mail_message = $is_save ? $mail_notification_message : $mail_blocked_message;
+
         $params = [
             "siteName" => $app->siteName,
             "nome" => $entity->name,
@@ -234,7 +240,10 @@ class Plugin extends \MapasCulturais\Plugin
             "url" => $entity->singleUrl,
             "baseUrl" => $app->getBaseUrl(),
             "detectedDetails" => implode("\n", $detected_details),
-            "ip" => $ip
+            "ip" => $ip,
+            "adminName" => $recipient->name,
+            'mailMessage' => $mail_message,
+            'dictEntity' => $this->dictEntity($entity, 'none')
         ];
         
         $mustache = new \Mustache_Engine();
