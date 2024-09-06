@@ -312,6 +312,26 @@ class Plugin extends \MapasCulturais\Plugin
     }
 
     /**
+     *  Retorna o texto com o nome da tabela
+     * @param Entity $entity 
+     * @return string 
+     */
+    public function dictTable(Entity $entity): string
+    {
+        $class = $entity->getClassName();
+
+        $entities = [
+            Agent::class => "agent",
+            Opportunity::class => "opportunity",
+            Project::class => "project",
+            Space::class => "space",
+            Event::class => "event",
+        ];
+
+        return $entities[$class];
+    }
+
+    /**
      * @param string $text
      * @return string
      */
