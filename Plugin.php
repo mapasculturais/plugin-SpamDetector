@@ -118,14 +118,12 @@ class Plugin extends \MapasCulturais\Plugin
             /** @var Entity $this */
             if($plugin->getSpamTerms($this, $plugin->config['termsBlock'])) {
                 $this->spamBlock = true;
-                $this->setStatus(-10);
             }
         });
 
         // Verifica se existem termos maliciosos e dispara o e-mail e a notificação
-        $app->hook("entity(<<{$hooks}>>).save:after", function () use ($plugin, $last_spam_sent) {
+        $app->hook("entity(<<{$hooks}>>).save:after", function () use ($plugin, $last_spam_sent, $app) {
             /** @var Entity $this */
-
             $users = $plugin->getAdminUsers($this);
             $terms = array_merge($plugin->config['termsBlock'], $plugin->config['terms']);
 
@@ -150,6 +148,12 @@ class Plugin extends \MapasCulturais\Plugin
                 $notification->user = $this->ownerUser;
                 $notification->message = $message;
                 $notification->save(true);
+            }
+
+            if($this->spamBlock) {
+                $conn = $app->em->getConnection();
+                $table = $plugin->dictTable($this);
+                $conn->executeQuery("UPDATE {$table} SET status = -10 WHERE id = {$this->id}");
             }
         });
 
