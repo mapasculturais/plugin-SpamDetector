@@ -27,6 +27,9 @@ class Plugin extends \MapasCulturais\Plugin
             'compre',
             'vendo',
             'vende',
+            'vendas',
+            'entregas',
+            'vendedor',
             'nazismo',
             'fascismo',
             'hitler',
@@ -46,6 +49,7 @@ class Plugin extends \MapasCulturais\Plugin
             'citotec',
             'c1totec',
             'cytotec',
+            'cyto',
             'sytotec',
             'sitotec',
             's1totec',
@@ -64,7 +68,10 @@ class Plugin extends \MapasCulturais\Plugin
             'misoprosotol',
             'mizoprozotol',
             'misoprozotol',
-            'mizoprosotol'
+            'mizoprosotol',
+            'abortivos',
+            'miso',
+            'mizo',
         ];
 
         if(isset($config['termsBlock'])) {
