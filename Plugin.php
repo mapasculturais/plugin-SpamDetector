@@ -123,7 +123,7 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->hook("entity(<<{$hooks}>>).save:before", function () use ($plugin, $app) {
             /** @var Entity $this */
-            if($plugin->getSpamTerms($this, $plugin->config['termsBlock'])) {
+            if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && !$this->spam_status) {
                 $this->spamBlock = true;
             }
         });
@@ -142,7 +142,7 @@ class Plugin extends \MapasCulturais\Plugin
             $is_spam_eligible = !$eligible_spam || ($current_timestamp - $eligible_spam->getTimestamp()) >= 86400;
             $is_spam_status_valid = !$this->spam_status;
 
-            if ($spam_terms && $is_spam_eligible && $is_spam_status_valid) {
+            if ($spam_terms && $is_spam_eligible && !$this->spam_status) {
                 $ip = $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
 
                 foreach ($users as $user) {
