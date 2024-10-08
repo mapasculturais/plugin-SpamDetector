@@ -62,9 +62,6 @@ class Plugin extends \MapasCulturais\Plugin
             'entities' => env('SPAM_DETECTOR_ENTITIES', ['Agent', 'Opportunity', 'Project', 'Space', 'Event']),
             'fields' => env('SPAM_DETECTOR_FIELDS', $default_fields),
             'termsBlock' => env('SPAM_DETECTOR_TERMS_BLOCK', $terms_block),
-            'filename_terms' => env('SPAM_FILENAME_TERMS','terms-config.txt'),
-            'file_path_terms' => env('SPAM_FILE_PATH_TERMS', __DIR__ . "/files"),
-
         ];
 
         parent::__construct($config);
@@ -449,9 +446,8 @@ class Plugin extends \MapasCulturais\Plugin
 
     public static function getPathFile() :string
     {
-        $self = self::getInstance();
-        $file_path = $self->config['file_path_terms'];
-        $file_name = $self->config['filename_terms'];
+        $file_path = __DIR__ . "/files";
+        $file_name = 'terms-config.txt';
         $path = $file_path . '/' . $file_name;
 
         return $path;
