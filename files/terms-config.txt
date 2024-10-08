@@ -20,7 +20,7 @@
         "canalha",
         "farm\u00e1cia",
         "farma",
-        "asdaseasw"
+       
     ],
     "blocked": [
         "citotec",
@@ -46,6 +46,5 @@
         "sdfsadasdasd",
         "venda",
         "vende",
-        "asdasdsa"
     ]
 }
