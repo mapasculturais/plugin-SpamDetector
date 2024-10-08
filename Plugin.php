@@ -150,6 +150,10 @@ class Plugin extends \MapasCulturais\Plugin
                 $app->view->enqueueStyle('app-v2', 'admin-spam-warning', 'css/admin-spam-warning.css');
             }
         });
+
+        $app->hook('component(mc-icon).iconset', function(&$iconset){
+            $iconset['security'] = "material-symbols:security";
+        });
     }
     
     public function register() {
