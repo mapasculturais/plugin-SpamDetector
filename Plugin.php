@@ -62,9 +62,6 @@ class Plugin extends \MapasCulturais\Plugin
             'entities' => env('SPAM_DETECTOR_ENTITIES', ['Agent', 'Opportunity', 'Project', 'Space', 'Event']),
             'fields' => env('SPAM_DETECTOR_FIELDS', $default_fields),
             'termsBlock' => env('SPAM_DETECTOR_TERMS_BLOCK', $terms_block),
-            'filename_terms' => env('SPAM_FILENAME_TERMS','terms-config.txt'),
-            'file_path_terms' => env('SPAM_FILE_PATH_TERMS', __DIR__ . "/files"),
-
         ];
 
         parent::__construct($config);
@@ -81,12 +78,14 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->hook("entity(<<{$hooks}>>).save:before", function () use ($plugin, $app) {
             /** @var Entity $this */
-            if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && !$this->spam_status) {
+            if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && $this->spam_status != 2) {
                 $this->spamBlock = true;
             }
         });
         $app->hook('template(panel.index.panel-nav-left-sidebar):begin', function() use($app) {
-            $this->part('configuration-menu');
+            if($app->user->is('admin')) {
+                $this->part('configuration-menu');
+            }
         });
         
         // Verifica se existem termos maliciosos e dispara o e-mail e a notificação
@@ -102,7 +101,10 @@ class Plugin extends \MapasCulturais\Plugin
 
             $is_spam_eligible = !$eligible_spam || ($current_timestamp - $eligible_spam->getTimestamp()) >= 86400;
 
-            if ($spam_terms && $is_spam_eligible && !$this->spam_status) {
+            $conn = $app->em->getConnection();
+            $table = $plugin->dictTable($this);
+
+            if ($spam_terms && $is_spam_eligible && $this->spam_status != 2) {
                 $ip = $_SERVER['HTTP_X_REAL_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
 
                 foreach ($users as $user) {
@@ -115,19 +117,26 @@ class Plugin extends \MapasCulturais\Plugin
                 $notification->user = $this->ownerUser;
                 $notification->message = $message;
                 $notification->save(true);
+
+
+                if($spam_terms) {
+                    $table_meta = strtolower($table)."_meta";;
+                    if(!$conn->fetchAll("SELECT * FROM {$table_meta} WHERE key = 'spam_status' and object_id = {$this->id}")) {
+                        $conn->executeQuery("INSERT INTO {$table_meta} (id, object_id, key, value) VALUES (nextval('{$table_meta}_id_seq'), {$this->id}, 'spam_status', 1)");
+                    }
+                }
             }
 
             if($this->spamBlock) {
-                $conn = $app->em->getConnection();
-                $table = $plugin->dictTable($this);
                 $conn->executeQuery("UPDATE {$table} SET status = -10 WHERE id = {$this->id}");
+                $plugin->lockEntityTree($this->ownerUser);
             }
         });
 
         // Garante que o termo encontrado fique salvo e o e-mail seja disparado
         $app->hook("entity(<<{$hooks}>>).save:finish", function () use ($plugin, $app) {
             /** @var Entity $this */
-            if($plugin->getSpamTerms($this, $plugin->config['termsBlock'])) {
+            if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && $this->spam_status != 2) {
                 $this->ownerUser->setStatus(-10);
             }
         });
@@ -135,7 +144,7 @@ class Plugin extends \MapasCulturais\Plugin
         // remove a permissão de publicar caso encontre termos que estão na lista de termos elegível a bloqueio
         $app->hook("entity(<<{$hooks}>>).canUser(publish)", function ($user, &$result) use($plugin, &$last_spam_sent) {
             /** @var Entity $this */
-            if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && !$user->is('admin')) {
+            if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && !$user->is('admin') && $this->spam_status != 2) {
                 $result = false;
             }
         });
@@ -143,8 +152,9 @@ class Plugin extends \MapasCulturais\Plugin
         // Caso for encontrado o termo e o usuário logado for o admin, irá aparecer na entidade um warning
         $app->hook("template(<<{$hooks}>>.<<edit|single>>.entity-header):before", function() use($plugin, $app) {
             $entity = $this->controller->requestedEntity;
+            $terms = array_merge($plugin->config['termsBlock'], $plugin->config['terms']);
 
-            if($plugin->getSpamTerms($entity, $plugin->config['terms']) && $app->user->is('admin')) {
+            if($plugin->getSpamTerms($entity, $terms) && $app->user->is('admin')) {
                 $this->part('admin-spam-warning');
                 $app->view->enqueueStyle('app-v2', 'admin-spam-warning', 'css/admin-spam-warning.css');
             }
@@ -173,8 +183,15 @@ class Plugin extends \MapasCulturais\Plugin
             
             $this->registerMetadata($namespace,'spam_status', [
                 'label' => i::__('Classificar como Spam'),
-                'type' => 'boolean',
-                'default' => false,
+                'type' => 'int',
+                'default' => 1,
+                'unserilize' => function($entity) {
+                    if(!$entity->spam_status) {
+                        return 1;
+                    }
+
+                    return $entity->spam_status;
+                }
             ]);
         }
     }
@@ -351,6 +368,8 @@ class Plugin extends \MapasCulturais\Plugin
      * @return array Retorna um array contendo os campos onde termos de spam foram encontrados.
     */
     public function getSpamTerms($entity, $terms): array {
+        $app = App::i();
+
         $fields = $this->config['fields'];
         $spam_detector = [];
         $found_terms = [];
@@ -424,6 +443,9 @@ class Plugin extends \MapasCulturais\Plugin
         return self::$instance;
     }
     
+    /**
+     * @return array Retorna um array com os dados salvos no arquivo de configuração de termos
+     */
     public static function getFileTerms(): array
     {
         $path = Plugin::getPathFile();
@@ -444,13 +466,40 @@ class Plugin extends \MapasCulturais\Plugin
         return $result;
     }
 
+    /**
+     * @return string Retorna uma string que representa o caminho do arquivo de configuração de termos
+     */
     public static function getPathFile() :string
     {
-        $self = self::getInstance();
-        $file_path = $self->config['file_path_terms'];
-        $file_name = $self->config['filename_terms'];
+        $file_path = __DIR__ . "/files";
+        $file_name = 'terms-config.txt';
         $path = $file_path . '/' . $file_name;
 
         return $path;
+    }
+
+    public function lockEntityTree($user)
+    {
+        $app = App::i();
+
+        $conn = $app->em->getConnection();
+
+        $agent_ids = [];
+        if($entities = $this->config['entities']) {
+            if($results = $conn->fetchAll("SELECT * FROM agent WHERE user_id = {$user->id}")) {
+                foreach($results as $value) {
+                    $agent_ids[] = $value['id'];
+                }
+            }
+
+            if($agent_ids) {
+                $ids = implode(",", $agent_ids);
+                foreach($entities as $entity) {
+                    $table = strtolower($entity);
+                    $column = $table === "agent" ? "id" : "agent_id";
+                    $conn->executeQuery("UPDATE {$table} SET status = -10 WHERE {$column} IN ({$ids})");
+                }
+            }
+        }
     }
 }

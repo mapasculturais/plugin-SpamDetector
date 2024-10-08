@@ -15,9 +15,8 @@ app.component('spam-warning', {
     },
 
     methods: {
-        setSpamStatus() {
-            this.spamStatus = !this.spamStatus;
-            this.entity.spam_status = this.spamStatus;
+        setSpamStatus(status) {
+            this.entity.spam_status = status;
             this.entity.save();
         },
 
