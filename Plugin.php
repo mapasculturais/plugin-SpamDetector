@@ -82,7 +82,8 @@ class Plugin extends \MapasCulturais\Plugin
                 $this->spamBlock = true;
             }
         });
-        $app->hook('template(panel.index.panel-nav-left-sidebar):begin', function() use($app) {
+
+        $app->hook('template(panel.<<*>>.panel-nav-left-sidebar):begin', function() use($app) {
             if($app->user->is('admin')) {
                 $this->part('configuration-menu');
             }
