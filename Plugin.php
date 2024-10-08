@@ -86,7 +86,9 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
         $app->hook('template(panel.index.panel-nav-left-sidebar):begin', function() use($app) {
-            $this->part('configuration-menu');
+            if($app->user->is('admin')) {
+                $this->part('configuration-menu');
+            }
         });
         
         // Verifica se existem termos maliciosos e dispara o e-mail e a notificação
