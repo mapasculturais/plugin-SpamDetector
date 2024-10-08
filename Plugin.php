@@ -21,59 +21,13 @@ class Plugin extends \MapasCulturais\Plugin
 
     public function __construct($config = [])
     {
-        $default_terms = [
-            'minecraft',
-            'venda',
-            'compra',
-            'compre',
-            'vendo',
-            'vende',
-            'vendas',
-            'entregas',
-            'vendedor',
-            'nazismo',
-            'fascismo',
-            'hitler',
-            'premium',
-            'grátis',
-            'gratuito',
-            'download',
-            'baixar',
-            'vadia',
-            'puta',
-            'canalha',
-            'farmácia',
-            'farma',
-        ];
-
-        $terms_block = [
-            'citotec',
-            'c1totec',
-            'cytotec',
-            'cyto',
-            'sytotec',
-            'sitotec',
-            's1totec',
-            'apk',
-            'install',
-            'installer',
-            'instale',
-            'instalar',
-            'instalador',
-            'mysoprosotol',
-            'mysoprosotol',
-            'myzoprozotol',
-            'mysoprozotol',
-            'myzoprosotol',
-            'misoprosotol',
-            'misoprosotol',
-            'mizoprozotol',
-            'misoprozotol',
-            'mizoprosotol',
-            'abortivos',
-            'miso',
-            'mizo',
-        ];
+        $spam_terms = [];
+        $default_terms = [];
+        $terms_block = [];
+        
+        $spam_terms = Plugin::getFileTerms();
+        $default_terms = $spam_terms['notification'];
+        $terms_block = $spam_terms['blocked'];
 
         if(isset($config['termsBlock'])) {
             $terms_block = $terms_block += $config['termsBlock'];
@@ -107,7 +61,10 @@ class Plugin extends \MapasCulturais\Plugin
             'terms' => env('SPAM_DETECTOR_TERMS', $default_terms),
             'entities' => env('SPAM_DETECTOR_ENTITIES', ['Agent', 'Opportunity', 'Project', 'Space', 'Event']),
             'fields' => env('SPAM_DETECTOR_FIELDS', $default_fields),
-            'termsBlock' => env('SPAM_DETECTOR_TERMS_BLOCK', $terms_block)
+            'termsBlock' => env('SPAM_DETECTOR_TERMS_BLOCK', $terms_block),
+            'filename_terms' => env('SPAM_FILENAME_TERMS','terms-config.txt'),
+            'file_path_terms' => env('SPAM_FILE_PATH_TERMS', __DIR__ . "/files"),
+
         ];
 
         parent::__construct($config);
@@ -459,5 +416,35 @@ class Plugin extends \MapasCulturais\Plugin
 
     public static function getInstance(){
         return self::$instance;
+    }
+    
+    public static function getFileTerms(): array
+    {
+        $path = Plugin::getPathFile();
+        $result = [
+            "notification" => [],
+            "blocked" => [],
+        ];
+
+        if (file_exists($path)) {
+            $data = file_get_contents($path);
+
+            if($_data = json_decode($data, true)) {
+                $result['notification'] = $_data['notification'] ?? [];
+                $result['blocked'] = $_data['blocked'] ?? [];
+            }
+        }
+
+        return $result;
+    }
+
+    public static function getPathFile() :string
+    {
+        $self = self::getInstance();
+        $file_path = $self->config['file_path_terms'];
+        $file_name = $self->config['filename_terms'];
+        $path = $file_path . '/' . $file_name;
+
+        return $path;
     }
 }
