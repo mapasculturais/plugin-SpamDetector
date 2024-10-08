@@ -424,6 +424,9 @@ class Plugin extends \MapasCulturais\Plugin
         return self::$instance;
     }
     
+    /**
+     * @return array Retorna um array com os dados salvos no arquivo de configuração de termos
+     */
     public static function getFileTerms(): array
     {
         $path = Plugin::getPathFile();
@@ -444,6 +447,9 @@ class Plugin extends \MapasCulturais\Plugin
         return $result;
     }
 
+    /**
+     * @return string Retorna uma string que representa o caminho do arquivo de configuração de termos
+     */
     public static function getPathFile() :string
     {
         $file_path = __DIR__ . "/files";
