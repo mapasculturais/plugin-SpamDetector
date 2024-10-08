@@ -81,11 +81,14 @@ class Plugin extends \MapasCulturais\Plugin
 
         $app->hook("entity(<<{$hooks}>>).save:before", function () use ($plugin, $app) {
             /** @var Entity $this */
-            if($plugin->getSpamTerms($this, $plugin->config['termsBlock'])) {
+            if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && !$this->spam_status) {
                 $this->spamBlock = true;
             }
         });
-
+        $app->hook('template(panel.index.panel-nav-left-sidebar):begin', function() use($app) {
+            $this->part('configuration-menu');
+        });
+        
         // Verifica se existem termos maliciosos e dispara o e-mail e a notificação
         $app->hook("entity(<<{$hooks}>>).save:after", function () use ($plugin, $last_spam_sent, $app) {
             /** @var Entity $this */
