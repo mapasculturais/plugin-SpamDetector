@@ -22,7 +22,7 @@ $this->import("
             </a>
         </template>
 
-        <template v-if="entity?.id && entity.status==1" #actions="modal">
+        <template #actions="modal">
             <spam-add-config></spam-add-config>
         </template>
     </mc-modal>
