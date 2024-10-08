@@ -13,6 +13,7 @@ use MapasCulturais\Entities\Project;
 use MapasCulturais\Entities\Opportunity;
 use MapasCulturais\Entities\Notification;
 use MapasCulturais\Entity;
+use SpamDetector\Controller;
 
 class Plugin extends \MapasCulturais\Plugin
 {
@@ -192,6 +193,10 @@ class Plugin extends \MapasCulturais\Plugin
     }
     
     public function register() {
+        $app = App::i();
+
+        $app->registerController('spamdetector', Controller::class);
+
         $entities = $this->config['entities'];
 
         foreach($entities as $entity) {
