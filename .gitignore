@@ -3,5 +3,4 @@ assets/js/app.js
 assets/css/plugin-SpamDetector.css
 mix-manifest.json
 node_modules/
-files/terms-config.txt
 files/terms-config_sample.txt
