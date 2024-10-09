@@ -15,8 +15,8 @@ app.component('spam-add-config', {
 
     data() {
         return {
-            notificationTags: $MAPAS.config.spamAddConfig.spamTerms.notification || [],
-            blockedTags: $MAPAS.config.spamAddConfig.spamTerms.blocked || [],
+            notificationTags: $MAPAS.config.spamAddConfig.spamTerms.notification.sort() || [],
+            blockedTags: $MAPAS.config.spamAddConfig.spamTerms.blocked.sort() || [],
         };
     },
 
