@@ -76,6 +76,10 @@ class Plugin extends \MapasCulturais\Plugin
         $hooks = implode('|', $plugin->config['entities']);
         $last_spam_sent = null;
 
+        $app->hook('GET(<<auth|panel>>.<<*>>):before', function() use ($app) {
+            $app->view->enqueueStyle('app-v2', 'SpamDetector-v2', 'css/plugin-SpamDetector.css');
+        });
+
         $app->hook("entity(<<{$hooks}>>).save:before", function () use ($plugin, $app) {
             /** @var Entity $this */
             if($plugin->getSpamTerms($this, $plugin->config['termsBlock']) && $this->spam_status != 2) {
