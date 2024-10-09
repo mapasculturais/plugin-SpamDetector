@@ -14,16 +14,5 @@ $this->import("
 ");
 ?>
 <li>
-    <mc-modal button-label="<?php i::_e('Controle de Spam') ?>">
-        <template #button='{close, open, toogle, loading}'>
-            <a href="#" @click="open()">
-                <mc-icon name="security"> </mc-icon>
-                <?= i::__('Controle de SPAM') ?>
-            </a>
-        </template>
-
-        <template #actions="modal">
-            <spam-add-config></spam-add-config>
-        </template>
-    </mc-modal>
+    <spam-add-config></spam-add-config>
 </li>
