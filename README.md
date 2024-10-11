@@ -70,6 +70,6 @@
 ## Observações
 ### Controlanto os termos pela interface
 > ##### - Disponível apenas para Mapas Culturais que rodam apartir da versão v7.4.25
-- Logado como um administrador, acessar o painel de controle e no menu do sidebar esquerdo existrá um botão que ao ser clicado abrirá um modal. Neste modal é possivel adicionar ou remover termos das duas lista **Notificação** ou **Bloqueio** Veja imagens abaixo.
+- Logado como um administrador, acessar o painel de controle e no menu do sidebar esquerdo existrá um botão que ao ser clicado abrirá um modal. Neste modal é possivel adicionar ou remover termos das duas lista **Notificação** ou **Bloqueio**.
 
 
