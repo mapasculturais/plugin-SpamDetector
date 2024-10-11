@@ -6,8 +6,9 @@
 - O plugin implementa na plataforma um sistema de detecção automática de spam, identificando termos suspeitos em entidades como Agente, Oportunidade, Projeto, Espaço e Evento, ajudando a manter o conteúdo da plataforma seguro e livre de spam.
 
 ## Requisitos Mínimos
-
 - Mapas Culturais v7.0.0^
+
+> **ATENÇÂO:** Até a versão **v7.4.24**, o plugin só permite a customização dos termos de bloqueio através das configurações no arquivo `docker/common/config.d/plugins.php`. A partir da versão **v7.4.25**, é possível customizar e controlar os termos diretamente pela interface.
 
 ## Configuração básica
 
@@ -37,6 +38,7 @@
 
 ## Personalização
 
+> ### Para Mapas Culturais que rodam até a versão v7.4.24
 - As configurações do plugin permitem personalizar os termos a serem detectados (`terms`) e bloqueados (`termsBlock`), as entidades monitoradas (`entities`), e os campos onde a detecção deve ocorrer (`fields`). Essas configurações podem ser definidas dentro de uma chave chamada `config` no arquivo `docker/common/config.d/plugins.php`, como mostrado abaixo:
 
     ```php
@@ -60,7 +62,14 @@
 
 - **IMPORTANTE:** Ao adicionar configurações personalizadas na chave `config`, o que for adicionado irá **somar** a configuração padrão. Certifique-se de incluir todos os parâmetros necessários para evitar comportamentos indesejados.
 
+
 ## Notificações
 
 - Quando um possível spam é detectado, uma notificação é enviada aos administradores cadastrados, e um e-mail é gerado usando um template Mustache (`email-spam.html`). O e-mail contém detalhes sobre os termos e os campos onde foram encontrados, juntamente com um link para a entidade suspeita na plataforma.
+
+## Observações
+### Controlanto os termos pela interface
+> ##### - Disponível apenas para Mapas Culturais que rodam apartir da versão v7.4.25
+- Logado como um administrador, acessar o painel de controle e no menu do sidebar esquerdo existrá um botão que ao ser clicado abrirá um modal. Neste modal é possivel adicionar ou remover termos das duas lista **Notificação** ou **Bloqueio** Veja imagens abaixo.
+
 
