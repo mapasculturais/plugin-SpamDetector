@@ -125,7 +125,7 @@ class Plugin extends \MapasCulturais\Plugin
 
 
                 if($spam_terms) {
-                    $table_meta = strtolower($table)."_meta";;
+                    $table_meta = strtolower($table)."_meta";
                     if(!$conn->fetchAll("SELECT * FROM {$table_meta} WHERE key = 'spam_status' and object_id = {$this->id}")) {
                         $conn->executeQuery("INSERT INTO {$table_meta} (id, object_id, key, value) VALUES (nextval('{$table_meta}_id_seq'), {$this->id}, 'spam_status', 1)");
                     }
@@ -264,11 +264,14 @@ class Plugin extends \MapasCulturais\Plugin
         $date_time->add(new \DateInterval('PT10S'));
         $date_time = $date_time->format('Y-m-d H:i:s');
         
+        $table = $this->dictTable($entity);
+        $table_meta = strtolower($table)."_meta";
+
         $conn = $app->em->getConnection();
-        if(!$conn->fetchAll("SELECT * FROM agent_meta WHERE key = 'spam_sent_email' and object_id = {$entity->id}")) {
-            $conn->executeQuery("INSERT INTO agent_meta (id, object_id, key, value) VALUES (nextval('agent_meta_id_seq'), {$entity->id}, 'spam_sent_email', '{$date_time}')");
+        if(!$conn->fetchAll("SELECT * FROM {$table_meta} WHERE key = 'spam_sent_email' and object_id = {$entity->id}")) {
+            $conn->executeQuery("INSERT INTO {$table_meta} (id, object_id, key, value) VALUES (nextval('{$table_meta}_id_seq'), {$entity->id}, 'spam_sent_email', '{$date_time}')");
         } else {
-            $conn->executeQuery("UPDATE agent_meta SET value = '{$date_time}' WHERE object_id = {$entity->id} AND key = 'spam_sent_email'");
+            $conn->executeQuery("UPDATE {$table_meta} SET value = '{$date_time}' WHERE object_id = {$entity->id} AND key = 'spam_sent_email'");
         }
 
         $app->enableAccessControl();
