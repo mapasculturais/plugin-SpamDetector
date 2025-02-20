@@ -1,7 +1,6 @@
 {
     "notification": [
         "minecraft",
-        "entregas",
         "nazismo",
         "fascismo",
         "hitler",
@@ -23,11 +22,6 @@
         "sitotec",
         "s1totec",
         "apk",
-        "install",
-        "installer",
-        "instale",
-        "instalar",
-        "instalador",
         "mysoprosotol",
         "myzoprosotol",
         "misoprosotol",
