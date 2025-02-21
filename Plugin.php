@@ -477,11 +477,22 @@ class Plugin extends \MapasCulturais\Plugin
     /**
      * @return string Retorna uma string que representa o caminho do arquivo de configuração de termos
      */
-    public static function getPathFile() :string
+    public static function getPathFile(): string
     {
-        $file_path = __DIR__ . "/files";
+        $file_path = PRIVATE_FILES_PATH . "spamDetector";
         $file_name = 'terms-config.txt';
         $path = $file_path . '/' . $file_name;
+        $source_file = __DIR__ . '/files/' . $file_name;
+
+        // Verifica se o diretório existe, senão cria
+        if (!is_dir($file_path)) {
+            mkdir($file_path, 0777, true);
+        }
+
+        // Verifica se o arquivo não existe e copia do diretório de origem
+        if (!file_exists($path) && file_exists($source_file)) {
+            copy($source_file, $path);
+        }
 
         return $path;
     }
