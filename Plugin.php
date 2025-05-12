@@ -212,8 +212,11 @@ class Plugin extends \MapasCulturais\Plugin
         $notification->user = $recipient->user;
         $notification->message = $message;
         $notification->save(true);
+
+        $locale = i::get_locale();
+        $template = "email-spam-{$locale}.html";
         
-        $filename = $app->view->resolveFilename("views/emails", "email-spam.html");
+        $filename = $app->view->resolveFilename("views/emails", $template);
         $template = file_get_contents($filename);
         
         $field_translations = [
