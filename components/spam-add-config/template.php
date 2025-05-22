@@ -29,6 +29,8 @@ $this->import('
                         <span class="spam-add-config__title semibold"> <?= i::__('Notificações')?></span>
                         <div class="field">
                             <input type="text" placeholder="Digite uma nova palavra chave de notificação" @keydown="change($event, 'notificationTags')"  @blur="clear($event)">
+                            <input type="text" placeholder="<?= i::esc_attr__('Digite uma nova palavra chave de notificação') ?>" @keydown="change($event, 'notificationTags')" @blur="clear($event)">
+
                         </div>    
                     </div>
                     <mc-tag-list class="spam-add-config__tags scrollbar" classes="spam-add-config__tag spam-add-config__tag--notification" :tags="notificationTags" @remove="saveTags()" editable></mc-tag-list>
@@ -41,6 +43,8 @@ $this->import('
                         <span class="spam-add-config__title semibold"> <?= i::__('Bloqueio')?></span>
                         <div class="field">
                             <input type="text" placeholder="Digite uma nova palavra chave de bloqueio" @keydown="change($event, 'blockedTags')" @blur="clear($event)">
+                            <input type="text" placeholder="<?= i::esc_attr__('Digite uma nova palavra chave de bloqueio') ?>" @keydown="change($event, 'blockedTags')" @blur="clear($event)">
+
                         </div>
                     </div>
                     <mc-tag-list class="spam-add-config__tags scrollbar" classes="spam-add-config__tag spam-add-config__tag--block" :tags="blockedTags"  @remove="saveTags()" editable></mc-tag-list>
