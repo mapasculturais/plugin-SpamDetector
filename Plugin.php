@@ -396,8 +396,7 @@ class Plugin extends \MapasCulturais\Plugin
                     $lowercase_term = $this->formatText($term);
                     $_term = implode("{$special_chars}", mb_str_split($lowercase_term));
 
-                    $pattern = '/([^\w]|[_0-9]|^)' . $_term . '([^\w]|[_0-9]|$)/';
-                    
+                    $pattern = '/([^\w]|[_0-9]|^)' . preg_quote($_term, '/') . '([^\w]|[_0-9]|$)/';
                     if (preg_match($pattern, $lowercase_value) && !in_array($term, $found_terms)) {
                         $found_terms[$field][] = $term;
                     }
