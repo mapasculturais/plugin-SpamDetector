@@ -228,7 +228,7 @@ class Plugin extends \MapasCulturais\Plugin
         $detected_details = [];
         foreach ($spam_detections as $detection) {
             $translated_field = isset($field_translations[$detection['field']]) ? $field_translations[$detection['field']] : $detection['field'];
-            $detected_details[] = "Campo: $translated_field, Termos: " . implode(', ', $detection['terms']) . '<br>';
+            $detected_details[] = i::__("Campo") . ": " . $translated_field . ", " . i::__("Termos") . ": " . implode(', ', $detection['terms']) . "<br>";            
         }
 
         $dict_entity = $this->dictEntity($entity, 'artigo');
@@ -254,14 +254,19 @@ class Plugin extends \MapasCulturais\Plugin
         $content = $mustache->render($template, $params);
 
         if ($email = $this->getAdminEmail($recipient)) {
-            $app->createAndSendMailMessage([
-                'from' => $app->config['mailer.from'],
-                'to' => $email,
-                'subject' => $is_save ? i::__("Spam - Conteúdo suspeito") : i::__("Spam - {$dict_entity} foi bloqueado(a)"),
-                'body' => $content,
-            ]);
-        }
+	    // TRANSLATORS: Subject of email reporting content flagged as suspicious or blocked
+ 	   $subject = $is_save
+	        ? i::__("Spam - Conteúdo suspeito") : sprintf(i::__("Spam - %s foi bloqueado(a)"), $dict_entity);
 
+	    $app->createAndSendMailMessage([
+	        'from' => $app->config['mailer.from'],
+	        'to' => $email,
+	        'subject' => $subject,
+	        'body' => $content,
+	    ]);
+	}
+
+        
         // Salvar metadado
         $date_time = new DateTime();
         $date_time->add(new \DateInterval('PT10S'));
@@ -286,37 +291,49 @@ class Plugin extends \MapasCulturais\Plugin
      * @return string 
      */
     public function dictEntity(Entity $entity, $type = "preposição"): string
-    {
-        $class = $entity->getClassName();
+	{
+    	$class = $entity->getClassName();
 
-        switch ($type) {
-            case 'preposição':
-                $prefixes = (object) ["f" => "na", "m" => "no"];
-                break;
-            case 'pronome':
-                $prefixes = (object) ["f" => "esta", "m" => "este"];
-                break;
-            case 'artigo':
-                $prefixes = (object) ["f" => "a", "m" => "o"];
-                break;
-            case 'none':
-                $prefixes = (object) ["f" => "", "m" => ""];
-                break;
-            default:
-                $prefixes = (object) ["f" => "", "m" => ""];
-                break;
-        }
-
-        $entities = [
-            Agent::class => "{$prefixes->m} Agente",
-            Opportunity::class => "{$prefixes->f} Oportunidade",
-            Project::class => "{$prefixes->m} Projeto",
-            Space::class => "{$prefixes->m} Espaço",
-            Event::class => "{$prefixes->m} Evento",
-        ];
-
-        return $entities[$class];
+    	switch ($type) {
+        case 'preposição':
+            // TRANSLATORS: 'na' and 'no' are prepositions meaning 'in the (f)' and 'in the (m)'
+            $prefixes = (object) [
+                'f' => i::__('na'), // feminino
+                'm' => i::__('no'), // masculino
+            ];
+            break;
+        	case 'pronome':
+            	// TRANSLATORS: 'esta' and 'este' are demonstrative pronouns (this-f, this-m)
+            	$prefixes = (object) [
+	                'f' => i::__('esta'),
+	                'm' => i::__('este'),
+	            ];
+	            break;
+        case 'artigo':
+            // TRANSLATORS: 'a' and 'o' are definite articles (the-f, the-m)
+            $prefixes = (object) [
+                'f' => i::__('a'),
+                'm' => i::__('o'),
+            ];
+            break;
+        case 'none':
+        default:
+            $prefixes = (object) ['f' => '', 'm' => ''];
+            break;
     }
+
+    $entities = [
+        // TRANSLATORS: %s is a prefix like 'na', 'esta', 'a'
+        Agent::class       => sprintf(i::__('%s Agente'),       $prefixes->m),
+        Opportunity::class => sprintf(i::__('%s Oportunidade'), $prefixes->f),
+        Project::class     => sprintf(i::__('%s Projeto'),      $prefixes->m),
+        Space::class       => sprintf(i::__('%s Espaço'),       $prefixes->m),
+        Event::class       => sprintf(i::__('%s Evento'),       $prefixes->m),
+    ];
+
+    return $entities[$class];
+}
+
 
     /**
      *  Retorna o texto com o nome da tabela
@@ -396,8 +413,7 @@ class Plugin extends \MapasCulturais\Plugin
                     $lowercase_term = $this->formatText($term);
                     $_term = implode("{$special_chars}", mb_str_split($lowercase_term));
 
-                    $pattern = '/([^\w]|[_0-9]|^)' . $_term . '([^\w]|[_0-9]|$)/';
-                    
+                    $pattern = '/([^\w]|[_0-9]|^)' . preg_quote($_term, '/') . '([^\w]|[_0-9]|$)/';
                     if (preg_match($pattern, $lowercase_value) && !in_array($term, $found_terms)) {
                         $found_terms[$field][] = $term;
                     }
