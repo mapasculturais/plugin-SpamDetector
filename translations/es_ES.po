@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: mapas\n"
-"POT-Creation-Date: 2025-05-08 14:53-0300\n"
+"POT-Creation-Date: 2025-06-16 14:48-0300\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: librecoop\n"
@@ -24,19 +24,27 @@ msgstr "Fecha de envío del correo electrónico"
 msgid "Classificar como Spam"
 msgstr "Clasificar como spam"
 
-#: plugin-SpamDetector/Plugin.php:220
+#: plugin-SpamDetector/Plugin.php:223
 msgid "Nome"
 msgstr "Nombre"
 
-#: plugin-SpamDetector/Plugin.php:221
+#: plugin-SpamDetector/Plugin.php:224
 msgid "Descrição Curta"
 msgstr "Descripción breve"
 
-#: plugin-SpamDetector/Plugin.php:222
+#: plugin-SpamDetector/Plugin.php:225
 msgid "Descrição Longa"
 msgstr "Descripción Larga"
 
-#: plugin-SpamDetector/Plugin.php:233
+#: plugin-SpamDetector/Plugin.php:231
+msgid "Campo"
+msgstr "Campo"
+
+#: plugin-SpamDetector/Plugin.php:231
+msgid "Termos"
+msgstr "Términos"
+
+#: plugin-SpamDetector/Plugin.php:236
 msgid ""
 "O sistema detectou possível spam em um conteúdo recente. Por favor, revise "
 "as informações abaixo e tome as medidas necessárias:"
@@ -44,7 +52,7 @@ msgstr ""
 "El sistema ha detectado posible spam en contenido reciente. Revise la "
 "siguiente información y tome las medidas adecuadas:"
 
-#: plugin-SpamDetector/Plugin.php:234
+#: plugin-SpamDetector/Plugin.php:237
 msgid ""
 "O sistema detectou um conteúdo inadequado neste cadastro e moveu-o para a "
 "lixeira. Seguem abaixo os dados para análise do conteúdo:"
@@ -52,9 +60,64 @@ msgstr ""
 "El sistema detectó contenido inapropiado en este registro y lo movió a la "
 "papelera. A continuación se muestran los datos para el análisis de contenido:"
 
-#: plugin-SpamDetector/Plugin.php:257
+#: plugin-SpamDetector/Plugin.php:259
 msgid "Spam - Conteúdo suspeito"
 msgstr "Spam - Contenido sospechoso"
+
+#: plugin-SpamDetector/Plugin.php:259
+#, php-format
+msgid "Spam - %s foi bloqueado(a)"
+msgstr "Spam - %s fue bloqueado(a)"
+
+#: plugin-SpamDetector/Plugin.php:301
+msgid "na"
+msgstr "en la"
+
+#: plugin-SpamDetector/Plugin.php:302
+msgid "no"
+msgstr "en el"
+
+#: plugin-SpamDetector/Plugin.php:308
+msgid "esta"
+msgstr "esta"
+
+#: plugin-SpamDetector/Plugin.php:309
+msgid "este"
+msgstr "este"
+
+#: plugin-SpamDetector/Plugin.php:315
+msgid "a"
+msgstr "hasta"
+
+#: plugin-SpamDetector/Plugin.php:316
+msgid "o"
+msgstr "el"
+
+#. TRANSLATORS: %s is a prefix like 'na', 'esta', 'a'
+#: plugin-SpamDetector/Plugin.php:327
+#, php-format
+msgid "%s Agente"
+msgstr "%s Agente"
+
+#: plugin-SpamDetector/Plugin.php:328
+#, php-format
+msgid "%s Oportunidade"
+msgstr "%s Oportunidad"
+
+#: plugin-SpamDetector/Plugin.php:329
+#, php-format
+msgid "%s Projeto"
+msgstr "%s Proyecto"
+
+#: plugin-SpamDetector/Plugin.php:330
+#, php-format
+msgid "%s Espaço"
+msgstr "%s Espacio"
+
+#: plugin-SpamDetector/Plugin.php:331
+#, php-format
+msgid "%s Evento"
+msgstr "%s Evento"
 
 #: plugin-SpamDetector/components/spam-add-config/template.php:17
 msgid "Controle de Spam"
@@ -338,9 +401,6 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 #~ "Agente colectivo sin RUT , con los campos Fecha de Nacimiento / Fundación "
 #~ "e  Email privado completos"
 
-#~ msgid "Espaço"
-#~ msgstr "Espacio"
-
 #~ msgid "Vincule um espaço a sua inscrição"
 #~ msgstr "Es obligatorio vincular un espacio a la inscripción"
 
@@ -353,14 +413,8 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 #~ msgid "Site"
 #~ msgstr "Página web"
 
-#~ msgid "Evento"
-#~ msgstr "Evento"
-
 #~ msgid "Eventos"
 #~ msgstr "Eventos"
-
-#~ msgid "Agente"
-#~ msgstr "Agente"
 
 #~ msgid "Agentes"
 #~ msgstr "Agentes"
@@ -368,14 +422,8 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 #~ msgid "Espaços"
 #~ msgstr "Espacios"
 
-#~ msgid "Projeto"
-#~ msgstr "Proyecto"
-
 #~ msgid "Projetos"
 #~ msgstr "Proyectos"
-
-#~ msgid "Oportunidade"
-#~ msgstr "Oportunidad"
 
 #~ msgid "Oportunidades"
 #~ msgstr "Oportunidades"
@@ -8715,9 +8763,6 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 #~ msgid "(0 = Sem limitações)"
 #~ msgstr "(0 = Sin limitaciones)"
 
-#~ msgid "Campo"
-#~ msgstr "Campo"
-
 #~ msgid "Valor"
 #~ msgstr "Valor"
 
@@ -9721,9 +9766,6 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 #~ msgid "Política de privacidade"
 #~ msgstr "Política de privacidad"
 
-#~ msgid "Termos de uso"
-#~ msgstr "Términos de uso"
-
 #~ msgid "Autorização de uso de imagem"
 #~ msgstr "Autorización de uso de imagen"
 
@@ -10469,9 +10511,6 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 #~ msgid "resultado final"
 #~ msgstr "resultado final"
 
-#~ msgid "estado"
-#~ msgstr "departamento"
-
 #~ msgid "coletivo"
 #~ msgstr "colectivo"
 
@@ -10880,9 +10919,6 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 
 #~ msgid "de"
 #~ msgstr "de"
-
-#~ msgid "a"
-#~ msgstr "hasta"
 
 #~ msgid "Preencher formulário"
 #~ msgstr "Rellenar formulario"
@@ -14150,9 +14186,6 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 
 #~ msgid "Bloqueio de campos"
 #~ msgstr "Bloqueo de campos"
-
-#~ msgid "ano"
-#~ msgstr "año"
 
 #~ msgid "anos"
 #~ msgstr "años"
@@ -19827,6 +19860,3 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 
 #~ msgid "Clique para marcar/desmarcar este"
 #~ msgstr "Haga clic para marcar/desmarcar este"
-
-#~ msgid "teste pt"
-#~ msgstr "teste es"
