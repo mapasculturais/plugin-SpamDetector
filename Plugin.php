@@ -228,7 +228,7 @@ class Plugin extends \MapasCulturais\Plugin
         $detected_details = [];
         foreach ($spam_detections as $detection) {
             $translated_field = isset($field_translations[$detection['field']]) ? $field_translations[$detection['field']] : $detection['field'];
-            $detected_details[] = "Campo: $translated_field, Termos: " . implode(', ', $detection['terms']) . '<br>';
+            $detected_details[] = "Campo: $translated_field, Términos: " . implode(', ', $detection['terms']) . '<br>';
         }
 
         $dict_entity = $this->dictEntity($entity, 'artigo');
