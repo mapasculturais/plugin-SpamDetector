@@ -70,6 +70,10 @@ class Plugin extends \MapasCulturais\Plugin
 
     public function _init()
     {
+        if(php_sapi_name() == "cli") {
+            return;
+        }
+
         $app = App::i();
         $plugin = $this;
 
