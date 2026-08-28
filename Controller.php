@@ -21,13 +21,52 @@ class Controller extends SpamDetectorController
             $app->pass();
         }
 
-        $path = Plugin::getPathFile();
+        $notification = $this->sanitizeTerms($this->data['notification'] ?? null);
+        $blocked = $this->sanitizeTerms($this->data['blocked'] ?? null);
 
-        if (file_exists($path)) {
-            $data = json_encode($this->data, JSON_PRETTY_PRINT);
-            file_put_contents($path, $data);
+        if (null === $notification || null === $blocked) {
+            $this->json(['error' => i::__('invalid payload: "notification" and "blocked" must be arrays')], 400);
         }
 
-        $this->json($this->data);
+        $data = [
+            'notification' => $notification,
+            'blocked' => $blocked,
+        ];
+
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        if (!Plugin::writeFileTerms($json)) {
+            $this->json(['error' => i::__('unable to persist the terms file')], 500);
+        }
+
+        $this->json($data);
+    }
+
+    /**
+     * Sanitizes a list of spam terms: strings only, trimmed, stripped of tags,
+     * empty entries dropped, duplicates removed, array reindexed.
+     * Returns null when the input is not an array (invalid payload).
+     */
+    protected function sanitizeTerms($terms): ?array
+    {
+        if (!is_array($terms)) {
+            return null;
+        }
+
+        $clean = [];
+        foreach ($terms as $term) {
+            if (!is_string($term)) {
+                continue;
+            }
+
+            $term = trim(strip_tags($term));
+            if ('' === $term) {
+                continue;
+            }
+
+            $clean[] = $term;
+        }
+
+        return array_values(array_unique($clean));
     }
 }

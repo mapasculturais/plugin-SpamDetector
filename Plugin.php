@@ -504,6 +504,32 @@ class Plugin extends \MapasCulturais\Plugin
         return $path;
     }
 
+    /**
+     * Atomically persists the terms JSON file: writes to a temporary file and
+     * renames it, so readers never see a partially-written file and concurrent
+     * writers cannot interleave content.
+     *
+     * @param string $json JSON payload with "notification" and "blocked" lists
+     * @return bool true on success, false on failure
+     */
+    public static function writeFileTerms(string $json): bool
+    {
+        $path = Plugin::getPathFile();
+
+        $tmp = $path . '.tmp.' . getmypid();
+
+        if (false === file_put_contents($tmp, $json, LOCK_EX)) {
+            return false;
+        }
+
+        if (!rename($tmp, $path)) {
+            unlink($tmp);
+            return false;
+        }
+
+        return true;
+    }
+
     public function lockEntityTree($user)
     {
         $app = App::i();
