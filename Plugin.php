@@ -158,12 +158,30 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
-        // Caso for encontrado o termo e o usuário logado for o admin, irá aparecer na entidade um warning
+        // Caso for encontrado o termo (ou a entidade já estiver marcada como spam) e o usuário logado for o admin, irá aparecer na entidade um warning
         $app->hook("template(<<{$hooks}>>.<<edit|single>>.entity-header):before", function() use($plugin, $app) {
             $entity = $this->controller->requestedEntity;
             $terms = array_merge($plugin->config['termsBlock'], $plugin->config['terms']);
 
-            if($plugin->getSpamTerms($entity, $terms) && $app->user->is('admin')) {
+            // getSpamTerms: detecção ao vivo (conteúdo ainda contém termo)
+            // spam_status persistido: mantém a tarja mesmo se o conteúdo foi limpo depois
+            // (não usar $entity->spam_status direto — o default do metadado é 1 e gera falso positivo)
+            $has_spam_terms = (bool) $plugin->getSpamTerms($entity, $terms);
+
+            $persisted_spam_status = null;
+            $table = $plugin->dictTable($entity);
+            $table_meta = strtolower($table) . '_meta';
+            $object_id = (int) $entity->id;
+            $rows = $app->em->getConnection()->fetchAll(
+                "SELECT value FROM {$table_meta} WHERE key = 'spam_status' AND object_id = {$object_id}"
+            );
+            if ($rows) {
+                $persisted_spam_status = (int) $rows[0]['value'];
+            }
+
+            $is_spam_flagged = in_array($persisted_spam_status, [1, 2], true);
+
+            if(($has_spam_terms || $is_spam_flagged) && $app->user->is('admin')) {
                 $this->part('admin-spam-warning');
                 $app->view->enqueueStyle('app-v2', 'admin-spam-warning', 'css/admin-spam-warning.css');
             }
