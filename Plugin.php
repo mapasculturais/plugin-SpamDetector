@@ -158,28 +158,36 @@ class Plugin extends \MapasCulturais\Plugin
             }
         });
 
-        // Caso for encontrado o termo (ou a entidade já estiver marcada como spam) e o usuário logado for o admin, irá aparecer na entidade um warning
+        // Tarja de admin: só com termo ao vivo OU histórico de detecção real
+        // (spam_status + spam_sent_email). spam_status sozinho não basta — o core
+        // já persistiu default=1 em saves comuns e gerou falso positivo.
         $app->hook("template(<<{$hooks}>>.<<edit|single>>.entity-header):before", function() use($plugin, $app) {
             $entity = $this->controller->requestedEntity;
             $terms = array_merge($plugin->config['termsBlock'], $plugin->config['terms']);
 
-            // getSpamTerms: detecção ao vivo (conteúdo ainda contém termo)
-            // spam_status persistido: mantém a tarja mesmo se o conteúdo foi limpo depois
-            // (não usar $entity->spam_status direto — o default do metadado é 1 e gera falso positivo)
             $has_spam_terms = (bool) $plugin->getSpamTerms($entity, $terms);
 
             $persisted_spam_status = null;
+            $had_real_detection = false;
             $table = $plugin->dictTable($entity);
             $table_meta = strtolower($table) . '_meta';
             $object_id = (int) $entity->id;
-            $rows = $app->em->getConnection()->fetchAll(
+            $conn = $app->em->getConnection();
+
+            $status_rows = $conn->fetchAll(
                 "SELECT value FROM {$table_meta} WHERE key = 'spam_status' AND object_id = {$object_id}"
             );
-            if ($rows) {
-                $persisted_spam_status = (int) $rows[0]['value'];
+            if ($status_rows) {
+                $persisted_spam_status = (int) $status_rows[0]['value'];
             }
 
-            $is_spam_flagged = in_array($persisted_spam_status, [1, 2], true);
+            $sent_rows = $conn->fetchAll(
+                "SELECT 1 FROM {$table_meta} WHERE key = 'spam_sent_email' AND object_id = {$object_id} LIMIT 1"
+            );
+            $had_real_detection = (bool) $sent_rows;
+
+            // 1 = sob monitoramento após detecção; 2 = gestor retirou do spam (histórico)
+            $is_spam_flagged = $had_real_detection && in_array($persisted_spam_status, [1, 2], true);
 
             if(($has_spam_terms || $is_spam_flagged) && $app->user->is('admin')) {
                 $this->part('admin-spam-warning');
@@ -211,13 +219,15 @@ class Plugin extends \MapasCulturais\Plugin
             $this->registerMetadata($namespace,'spam_status', [
                 'label' => i::__('Classificar como Spam'),
                 'type' => 'int',
-                'default' => 1,
-                'unserilize' => function($entity) {
-                    if(!$entity->spam_status) {
-                        return 1;
+                // null = nunca classificado. NÃO usar 1 como default: o core persiste o
+                // default no save e a tarja de admin interpreta 1 como "marcado como spam"
+                'default' => null,
+                'unserialize' => function($value) {
+                    if ($value === null || $value === '' || $value === false) {
+                        return null;
                     }
 
-                    return $entity->spam_status;
+                    return (int) $value;
                 }
             ]);
         }
@@ -401,8 +411,6 @@ class Plugin extends \MapasCulturais\Plugin
      * @return array Retorna um array contendo os campos onde termos de spam foram encontrados.
     */
     public function getSpamTerms($entity, $terms): array {
-        $app = App::i();
-
         $fields = $this->config['fields'];
         $spam_detector = [];
         $found_terms = [];
