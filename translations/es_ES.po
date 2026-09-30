@@ -338,9 +338,6 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 #~ "Agente colectivo sin RUT , con los campos Fecha de Nacimiento / Fundación "
 #~ "e  Email privado completos"
 
-#~ msgid "Espaço"
-#~ msgstr "Espacio"
-
 #~ msgid "Vincule um espaço a sua inscrição"
 #~ msgstr "Es obligatorio vincular un espacio a la inscripción"
 
@@ -353,14 +350,8 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 #~ msgid "Site"
 #~ msgstr "Página web"
 
-#~ msgid "Evento"
-#~ msgstr "Evento"
-
 #~ msgid "Eventos"
 #~ msgstr "Eventos"
-
-#~ msgid "Agente"
-#~ msgstr "Agente"
 
 #~ msgid "Agentes"
 #~ msgstr "Agentes"
@@ -368,14 +359,8 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 #~ msgid "Espaços"
 #~ msgstr "Espacios"
 
-#~ msgid "Projeto"
-#~ msgstr "Proyecto"
-
 #~ msgid "Projetos"
 #~ msgstr "Proyectos"
-
-#~ msgid "Oportunidade"
-#~ msgstr "Oportunidad"
 
 #~ msgid "Oportunidades"
 #~ msgstr "Oportunidades"
@@ -19830,3 +19815,96 @@ msgstr "Acceda a la gestión de usuarios haciendo clic aquí"
 
 #~ msgid "teste pt"
 #~ msgstr "teste es"
+
+msgid "no Agente"
+msgstr "en el Agente"
+
+msgid "na Oportunidade"
+msgstr "en la Oportunidad"
+
+msgid "no Projeto"
+msgstr "en el Proyecto"
+
+msgid "no Espaço"
+msgstr "en el Espacio"
+
+msgid "no Evento"
+msgstr "en el Evento"
+
+msgid "este Agente"
+msgstr "este Agente"
+
+msgid "esta Oportunidade"
+msgstr "esta Oportunidad"
+
+msgid "este Projeto"
+msgstr "este Proyecto"
+
+msgid "este Espaço"
+msgstr "este Espacio"
+
+msgid "este Evento"
+msgstr "este Evento"
+
+msgid "o Agente"
+msgstr "el Agente"
+
+msgid "a Oportunidade"
+msgstr "la Oportunidad"
+
+msgid "o Projeto"
+msgstr "el Proyecto"
+
+msgid "o Espaço"
+msgstr "el Espacio"
+
+msgid "o Evento"
+msgstr "el Evento"
+
+msgid "Agente"
+msgstr "Agente"
+
+msgid "Oportunidade"
+msgstr "Oportunidad"
+
+msgid "Projeto"
+msgstr "Proyecto"
+
+msgid "Espaço"
+msgstr "Espacio"
+
+msgid "Evento"
+msgstr "Evento"
+
+msgid "Spam - %s foi bloqueado(a)"
+msgstr "Spam - %s ha sido bloqueado(a)"
+
+msgid "%s possui histórico de conteúdos identificados como SPAM. Caso deseje reativar o monitoramento do conteúdo e voltar a receber notificações,"
+msgstr "%s tiene contenidos identificados como SPAM en su historial. Si desea reactivar el monitoreo del contenido y volver a recibir avisos,"
+
+msgid "%s %s foi enviado para moderação. Informamos que registramos seu ip: %s"
+msgstr "%s %s fue enviado a moderación. Le informamos que registramos su IP: %s"
+
+msgid "Possível spam detectado %s - <strong><i>%s</i></strong><br><br> <a href='%s'>Clique aqui</a> para verificar. Mais detalhes foram enviados para o seu e-mail"
+msgstr "Posible spam detectado en %s: <strong><i>%s</i></strong><br><br> <a href='%s'>Haga clic aquí</a> para revisarlo. Le enviamos más detalles por correo electrónico."
+
+msgid "Possível spam detectado %s - <strong><i>%s</i></strong><br><br> Apenas um administrador pode publicar este conteúdo, <a href='%s'>clique aqui</a> para verificar. Mais detalhes foram enviados para o seu e-mail"
+msgstr "Posible spam detectado en %s: <strong><i>%s</i></strong><br><br> Solo un administrador puede publicar este contenido. <a href='%s'>Haga clic aquí</a> para revisarlo. Le enviamos más detalles por correo electrónico."
+
+msgid "Os termos"
+msgstr "Los términos"
+
+msgid "já estão cadastrados"
+msgstr "ya están registrados"
+
+msgid "Falha ao salvar os termos. Verifique se você ainda está autenticado e tente novamente."
+msgstr "No se pudieron guardar los términos. Verifique que su sesión siga iniciada e intente de nuevo."
+
+msgid "invalid payload: \"notification\" and \"blocked\" must be arrays"
+msgstr "Datos inválidos: \"notification\" y \"blocked\" deben ser listas."
+
+msgid "unable to persist the terms file"
+msgstr "No se pudo guardar el archivo de términos."
+
+msgid "Campo: %s, Termos: %s"
+msgstr "Campo: %s, Términos: %s"

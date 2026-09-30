@@ -45,7 +45,7 @@ $this->import('
     </mc-alert>
 
     <mc-alert v-else type="warning" class="spam-alert">
-        <?= i::__("{$dict_entity} possui histórico de conteúdos identificados como SPAM. Caso deseje reativar o monitoramento do conteúdo e voltar a receber notificações,") ?>
+        <?= sprintf(i::__('%s possui histórico de conteúdos identificados como SPAM. Caso deseje reativar o monitoramento do conteúdo e voltar a receber notificações,'), $dict_entity) ?>
 
         <mc-confirm-button message="<?= i::esc_attr__('Deseja marcar como spam?')?>" @cancel="closeModal($event)" @confirm="setSpamStatus(1)">
             <template #button="modal">

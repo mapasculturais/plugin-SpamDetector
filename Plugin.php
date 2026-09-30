@@ -70,6 +70,10 @@ class Plugin extends \MapasCulturais\Plugin
 
     public function _init()
     {
+        // Carrega as traduções do plugin (translations/). Como o domínio é o 'default',
+        // o catálogo do core continua tendo prioridade e este só completa o que faltar.
+        i::load_textdomain('default', __DIR__ . '/translations', i::get_locale());
+
         if(php_sapi_name() == "cli") {
             return;
         }
@@ -121,7 +125,7 @@ class Plugin extends \MapasCulturais\Plugin
                 }
 
                 $dict_entity = $plugin->dictEntity($this, 'artigo');
-                $message = i::__("{$dict_entity} {$this->name} foi enviado para moderação. Informamos que registramos seu ip: {$ip}");
+                $message = ucfirst(sprintf(i::__('%s %s foi enviado para moderação. Informamos que registramos seu ip: %s'), $dict_entity, $this->name, $ip));
                 $notification = new Notification;
                 $notification->user = $this->ownerUser;
                 $notification->message = $message;
@@ -260,7 +264,7 @@ class Plugin extends \MapasCulturais\Plugin
         $detected_details = [];
         foreach ($spam_detections as $detection) {
             $translated_field = isset($field_translations[$detection['field']]) ? $field_translations[$detection['field']] : $detection['field'];
-            $detected_details[] = "Campo: $translated_field, Termos: " . implode(', ', $detection['terms']) . '<br>';
+            $detected_details[] = sprintf(i::__('Campo: %s, Termos: %s'), $translated_field, implode(', ', $detection['terms'])) . '<br>';
         }
 
         $dict_entity = $this->dictEntity($entity, 'artigo');
@@ -289,7 +293,7 @@ class Plugin extends \MapasCulturais\Plugin
             $app->createAndSendMailMessage([
                 'from' => $app->config['mailer.from'],
                 'to' => $email,
-                'subject' => $is_save ? i::__("Spam - Conteúdo suspeito") : i::__("Spam - {$dict_entity} foi bloqueado(a)"),
+                'subject' => $is_save ? i::__("Spam - Conteúdo suspeito") : sprintf(i::__('Spam - %s foi bloqueado(a)'), $dict_entity),
                 'body' => $content,
             ]);
         }
@@ -321,31 +325,46 @@ class Plugin extends \MapasCulturais\Plugin
     {
         $class = $entity->getClassName();
 
+        // Frases completas (artigo/preposição + entidade) para que cada idioma
+        // possa traduzi-las com a sua própria gramática.
         switch ($type) {
             case 'preposição':
-                $prefixes = (object) ["f" => "na", "m" => "no"];
+                $entities = [
+                    Agent::class => i::__('no Agente'),
+                    Opportunity::class => i::__('na Oportunidade'),
+                    Project::class => i::__('no Projeto'),
+                    Space::class => i::__('no Espaço'),
+                    Event::class => i::__('no Evento'),
+                ];
                 break;
             case 'pronome':
-                $prefixes = (object) ["f" => "esta", "m" => "este"];
+                $entities = [
+                    Agent::class => i::__('este Agente'),
+                    Opportunity::class => i::__('esta Oportunidade'),
+                    Project::class => i::__('este Projeto'),
+                    Space::class => i::__('este Espaço'),
+                    Event::class => i::__('este Evento'),
+                ];
                 break;
             case 'artigo':
-                $prefixes = (object) ["f" => "a", "m" => "o"];
-                break;
-            case 'none':
-                $prefixes = (object) ["f" => "", "m" => ""];
+                $entities = [
+                    Agent::class => i::__('o Agente'),
+                    Opportunity::class => i::__('a Oportunidade'),
+                    Project::class => i::__('o Projeto'),
+                    Space::class => i::__('o Espaço'),
+                    Event::class => i::__('o Evento'),
+                ];
                 break;
             default:
-                $prefixes = (object) ["f" => "", "m" => ""];
+                $entities = [
+                    Agent::class => i::__('Agente'),
+                    Opportunity::class => i::__('Oportunidade'),
+                    Project::class => i::__('Projeto'),
+                    Space::class => i::__('Espaço'),
+                    Event::class => i::__('Evento'),
+                ];
                 break;
         }
-
-        $entities = [
-            Agent::class => "{$prefixes->m} Agente",
-            Opportunity::class => "{$prefixes->f} Oportunidade",
-            Project::class => "{$prefixes->m} Projeto",
-            Space::class => "{$prefixes->m} Espaço",
-            Event::class => "{$prefixes->m} Evento",
-        ];
 
         return $entities[$class];
     }
@@ -455,8 +474,8 @@ class Plugin extends \MapasCulturais\Plugin
     */
     public function getNotificationMessage($entity, $is_save): string {
         $dict_entity = $this->dictEntity($entity, 'artigo');
-        $message_save = i::__("Possível spam detectado {$dict_entity} - <strong><i>{$entity->name}</i></strong><br><br> <a href='{$entity->singleUrl}'>Clique aqui</a> para verificar. Mais detalhes foram enviados para o seu e-mail");
-        $message_insert = $message_insert = i::__("Possível spam detectado {$dict_entity} - <strong><i>{$entity->name}</i></strong><br><br> Apenas um administrador pode publicar este conteúdo, <a href='{$entity->singleUrl}'>clique aqui</a> para verificar. Mais detalhes foram enviados para o seu e-mail");
+        $message_save = sprintf(i::__("Possível spam detectado %s - <strong><i>%s</i></strong><br><br> <a href='%s'>Clique aqui</a> para verificar. Mais detalhes foram enviados para o seu e-mail"), $dict_entity, $entity->name, $entity->singleUrl);
+        $message_insert = sprintf(i::__("Possível spam detectado %s - <strong><i>%s</i></strong><br><br> Apenas um administrador pode publicar este conteúdo, <a href='%s'>clique aqui</a> para verificar. Mais detalhes foram enviados para o seu e-mail"), $dict_entity, $entity->name, $entity->singleUrl);
 
         $message = $is_save ? $message_save : $message_insert;
 
